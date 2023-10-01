@@ -8,7 +8,7 @@ class OpenthermGW: public PollingComponent
 {
     private:
     const char *TAG = "openthermgw_component";
-    const char *LOGCOMP = "openthermgw_component03";
+    const char *LOGTOPIC = "openthermgw_component03";
 
     protected:
     uint8_t thermostat_in_pin_ = -1;
@@ -36,7 +36,7 @@ class OpenthermGW: public PollingComponent
     {
         // This will be called once to set up the component
         // think of it as the setup() call in Arduino
-        ESP_LOGD(TAG, "Setup");
+        ESP_LOGD(LOGTOPIC, "Setup");
 
         pinMode(thermostat_in_pin_, INPUT);
         digitalWrite(thermostat_in_pin_, HIGH); // pull up
@@ -50,7 +50,7 @@ class OpenthermGW: public PollingComponent
 
     void update() override
     {
-        ESP_LOGD(LOGCOMP, "update");
+        ESP_LOGD(LOGTOPIC, "update");
     }
 
     void loop() override
@@ -66,9 +66,9 @@ class OpenthermGW: public PollingComponent
                 //Serial.print(F("-> "));
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
-                ESP_LOGD(LOGCOMP, "Message from thermostat");//: %1", message.id);
+                ESP_LOGD(LOGTOPIC, "Message from thermostat type: %02hhx  id: %02hhx  HB: %02hhx  LB: %02hhx", message.type, message.id, message.valueHB, message.valueLB);
                 OPENTHERM::send(boiler_out_pin_, message); // forward message to boiler
-                ESP_LOGD(LOGCOMP, "---> sent to boiler");//: %1", message.id);
+                ESP_LOGD(LOGTOPIC, "---> sent to boiler");//: %1", message.id);
                 mode = MODE_LISTEN_SLAVE;
             }
         }
@@ -84,14 +84,14 @@ class OpenthermGW: public PollingComponent
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
                 //Serial.println();
-                ESP_LOGD(LOGCOMP, "Message from boiler");// %1", message.id);
+                ESP_LOGD(LOGTOPIC, "Message from boiler type: %02hhx  id: %02hhx  HB: %02hhx  LB: %02hhx", message.type, message.id, message.valueHB, message.valueLB);
                 OPENTHERM::send(thermostat_out_pin_, message); // send message back to thermostat
-                ESP_LOGD(LOGCOMP, "---> sent to thermostat");//: %1", message.id);
+                ESP_LOGD(LOGTOPIC, "---> sent to thermostat");//: %1", message.id);
                 mode = MODE_LISTEN_MASTER;
             }
             else if (OPENTHERM::isError())
             {
-                ESP_LOGD(LOGCOMP, "Message error");
+                ESP_LOGD(LOGTOPIC, "Message error");
                 mode = MODE_LISTEN_MASTER;
                 // Serial.println(F("<- Timeout"));
                 // Serial.println();
