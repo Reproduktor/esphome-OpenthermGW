@@ -67,8 +67,8 @@ class OpenthermGW: public PollingComponent
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
                 ESP_LOGD(LOGCOMP, "Message from thermostat");//: %1", message.id);
-
                 OPENTHERM::send(boiler_out_pin_, message); // forward message to boiler
+                ESP_LOGD(LOGCOMP, "---> sent to boiler");//: %1", message.id);
                 mode = MODE_LISTEN_SLAVE;
             }
         }
@@ -86,6 +86,7 @@ class OpenthermGW: public PollingComponent
                 //Serial.println();
                 ESP_LOGD(LOGCOMP, "Message from boiler");// %1", message.id);
                 OPENTHERM::send(thermostat_out_pin_, message); // send message back to thermostat
+                ESP_LOGD(LOGCOMP, "---> sent to thermostat");//: %1", message.id);
                 mode = MODE_LISTEN_MASTER;
             }
             else if (OPENTHERM::isError())
