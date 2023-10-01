@@ -5,7 +5,7 @@ namespace esphome {
 namespace openthermgw {
 
 class OpenthermGW: public PollingComponent
-
+{
     private:
     const char *LOGTOPIC = "openthermgw_component_11";
 
