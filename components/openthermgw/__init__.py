@@ -10,10 +10,10 @@ from esphome.const import (
 from esphome.core import coroutine_with_priority
 from esphome.cpp_generator import RawExpression
 
-CONF_THERMOSTAT_IN_PIN = "thermostat_in_pin"
-CONF_THERMOSTAT_OUT_PIN = "thermostat_out_pin"
-CONF_BOILER_IN_PIN = "boiler_in_pin"
-CONF_BOILER_OUT_PIN = "boiler_out_pin"
+CONF_MASTER_IN_PIN = "master_in_pin"
+CONF_MASTER_OUT_PIN = "master_out_pin"
+CONF_SLAVE_IN_PIN = "slave_in_pin"
+CONF_SLAVE_OUT_PIN = "slave_out_pin"
 CONF_OPENTHERM_ID = "opentherm_id"
 
 opentherm_ns = cg.esphome_ns.namespace("openthermgw")
@@ -24,10 +24,10 @@ MULTI_CONF = False
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(OpenThermGW),
-        cv.Required(CONF_THERMOSTAT_IN_PIN): pins.internal_gpio_input_pin_number,
-        cv.Required(CONF_THERMOSTAT_OUT_PIN): pins.internal_gpio_input_pin_number,
-        cv.Required(CONF_BOILER_IN_PIN): pins.internal_gpio_input_pin_number,
-        cv.Required(CONF_BOILER_OUT_PIN): pins.internal_gpio_input_pin_number,
+        cv.Required(CONF_MASTER_IN_PIN): pins.internal_gpio_input_pin_number,
+        cv.Required(CONF_MASTER_OUT_PIN): pins.internal_gpio_input_pin_number,
+        cv.Required(CONF_SLAVE_IN_PIN): pins.internal_gpio_input_pin_number,
+        cv.Required(CONF_SLAVE_OUT_PIN): pins.internal_gpio_input_pin_number,
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -39,10 +39,10 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    cg.add(var.set_thermostat_in_pin(config[CONF_THERMOSTAT_IN_PIN]))
-    cg.add(var.set_thermostat_out_pin(config[CONF_THERMOSTAT_OUT_PIN]))
-    cg.add(var.set_boiler_in_pin(config[CONF_BOILER_IN_PIN]))
-    cg.add(var.set_boiler_out_pin(config[CONF_BOILER_OUT_PIN]))
+    cg.add(var.set_master_in_pin(config[CONF_MASTER_IN_PIN]))
+    cg.add(var.set_master_out_pin(config[CONF_MASTER_OUT_PIN]))
+    cg.add(var.set_slave_in_pin(config[CONF_SLAVE_IN_PIN]))
+    cg.add(var.set_slave_out_pin(config[CONF_SLAVE_OUT_PIN]))
 
 
 def opentherm_component_schema():

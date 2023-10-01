@@ -8,13 +8,13 @@ class OpenthermGW: public PollingComponent
 {
     private:
     const char *TAG = "openthermgw_component";
-    const char *LOGTOPIC = "openthermgw_component04";
+    const char *LOGTOPIC = "openthermgw_component_05";
 
     protected:
-    uint8_t thermostat_in_pin_ = -1;
-    uint8_t thermostat_out_pin_ = -1;
-    uint8_t boiler_in_pin_ = -1;
-    uint8_t boiler_out_pin_ = -1;
+    uint8_t master_in_pin_ = -1;
+    uint8_t master_out_pin_ = -1;
+    uint8_t slave_in_pin_ = -1;
+    uint8_t slave_out_pin_ = -1;
 
     #define MODE_LISTEN_MASTER 0
     #define MODE_LISTEN_SLAVE 1
@@ -23,10 +23,10 @@ class OpenthermGW: public PollingComponent
     OpenthermData message;
 
     public:
-    void set_thermostat_in_pin(uint8_t pin) { thermostat_in_pin_ = pin; }
-    void set_thermostat_out_pin(uint8_t pin) { thermostat_out_pin_ = pin; }
-    void set_boiler_in_pin(uint8_t pin) { boiler_in_pin_ = pin; }
-    void set_boiler_out_pin(uint8_t pin) { boiler_out_pin_ = pin; }
+    void set_master_in_pin(uint8_t pin) { master_in_pin_ = pin; }
+    void set_master_out_pin(uint8_t pin) { master_out_pin_ = pin; }
+    void set_slave_in_pin(uint8_t pin) { slave_in_pin_ = pin; }
+    void set_slave_out_pin(uint8_t pin) { slave_out_pin_ = pin; }
     
     OpenthermGW(): PollingComponent(3000)
     {
@@ -38,19 +38,20 @@ class OpenthermGW: public PollingComponent
         // think of it as the setup() call in Arduino
         ESP_LOGD(LOGTOPIC, "Setup");
 
-        pinMode(thermostat_in_pin_, INPUT);
-        digitalWrite(thermostat_in_pin_, HIGH); // pull up
-        digitalWrite(thermostat_out_pin_, HIGH);
-        pinMode(thermostat_out_pin_, OUTPUT); // low output = high current, high output = low current
-        pinMode(boiler_in_pin_, INPUT);
-        digitalWrite(boiler_in_pin_, HIGH); // pull up
-        digitalWrite(boiler_out_pin_, HIGH);
-        pinMode(boiler_out_pin_, OUTPUT); // low output = high voltage, high output = low voltage
+        pinMode(master_in_pin_, INPUT);
+        digitalWrite(master_in_pin_, HIGH); // pull up
+        digitalWrite(master_out_pin_, HIGH);
+        pinMode(master_out_pin_, OUTPUT); // low output = high current, high output = low current
+        pinMode(slave_in_pin_, INPUT);
+        digitalWrite(slave_in_pin_, HIGH); // pull up
+        digitalWrite(slave_out_pin_, HIGH);
+        pinMode(slave_out_pin_, OUTPUT); // low output = high voltage, high output = low voltage
     }
 
     void update() override
     {
         ESP_LOGD(LOGTOPIC, "update");
+        ESP_LOGD(LOGTOPIC, "MIN: %d MOUT: %d SIN: %d SOUT: %d", master_in_pin_, master_out_pin_, slave_in_pin_, slave_out_pin_);
     }
 
     void loop() override
