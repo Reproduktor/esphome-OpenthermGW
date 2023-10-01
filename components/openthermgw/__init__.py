@@ -44,8 +44,6 @@ async def to_code(config):
     cg.add(var.set_boiler_in_pin(config[CONF_BOILER_IN_PIN]))
     cg.add(var.set_boiler_out_pin(config[CONF_BOILER_OUT_PIN]))
 
-    #cg.add_library("ihormelnyk/OpenTherm Library", "1.1.3")
-    #cg.add_library("https://github.com/rsciriano/opentherm_library.git#functional_callbacks", None)
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.
@@ -55,11 +53,3 @@ def opentherm_component_schema():
         cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenThermGW),
     }
     return cv.Schema(schema)
-
-#async def set_hotwater_climate(var, config):
-#    parent = await cg.get_variable(config[CONF_OPENTHERM_ID])
-#    cg.add(parent.set_hotWaterClimate(var))
-
-#async def set_heatingwater_climate(var, config):
-#    parent = await cg.get_variable(config[CONF_OPENTHERM_ID])
-#   cg.add(parent.set_heatingWaterClimate(var))
