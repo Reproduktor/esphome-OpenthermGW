@@ -8,7 +8,7 @@ class OpenthermGW: public PollingComponent
 {
     private:
     const char *TAG = "openthermgw_component";
-    const char *LOGTOPIC = "openthermgw_component03";
+    const char *LOGTOPIC = "openthermgw_component04";
 
     protected:
     uint8_t thermostat_in_pin_ = -1;
