@@ -1,5 +1,4 @@
 #include "esphome.h"
-//#include "esphome/components/sensor/sensor.h"
 #include "opentherm.h"
 
 namespace esphome {
