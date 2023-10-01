@@ -16,7 +16,7 @@ CONF_BOILER_IN_PIN = "boiler_in_pin"
 CONF_BOILER_OUT_PIN = "boiler_out_pin"
 CONF_OPENTHERM_ID = "opentherm_id"
 
-opentherm_ns = cg.esphome_ns.namespace("OPENTHERM")
+opentherm_ns = cg.esphome_ns.namespace("openthermgw")
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component, cg.esphome_ns.namespace("text_sensor").class_("TextSensor"))
 
 
