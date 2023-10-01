@@ -1,4 +1,4 @@
-CODEOWNERS = ["@reproduktor/esphome-OpenthermGW"]
+CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
