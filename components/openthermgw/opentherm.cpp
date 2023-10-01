@@ -430,7 +430,7 @@ static void initTimer() {
 void OPENTHERM::_startReadTimer() {
   noInterrupts();
   initTimer();
-  timerAttachInterrupt(timer, OPENTHERM::_timerISR, true);
+  timerAttachInterrupt(timer, OPENTHERM::_timerISR, false);
   timerAlarmWrite(timer, 200, true);
   timerAlarmEnable(timer);
   interrupts();
@@ -440,7 +440,7 @@ void OPENTHERM::_startReadTimer() {
 void OPENTHERM::_startWriteTimer() {
   noInterrupts();
   initTimer();
-  timerAttachInterrupt(timer, OPENTHERM::_timerISR, true);
+  timerAttachInterrupt(timer, OPENTHERM::_timerISR, false);
   timerAlarmWrite(timer, 500, true);
   timerAlarmEnable(timer);
   interrupts();
@@ -450,7 +450,7 @@ void OPENTHERM::_startWriteTimer() {
 void OPENTHERM::_startTimeoutTimer() {
   noInterrupts();
   initTimer();
-  timerAttachInterrupt(timer, OPENTHERM::_timerISR, true);
+  timerAttachInterrupt(timer, OPENTHERM::_timerISR, false);
   timerAlarmWrite(timer, 1000, true);
   timerAlarmEnable(timer);
   interrupts();
