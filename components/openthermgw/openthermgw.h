@@ -8,6 +8,8 @@ class OpenthermGW: public PollingComponent
 {
     private:
     const char *TAG = "openthermgw_component";
+    const char *LOGCOMP = "openthermgw_component02";
+
     protected:
     uint8_t thermostat_in_pin_ = -1;
     uint8_t thermostat_out_pin_ = -1;
@@ -34,7 +36,7 @@ class OpenthermGW: public PollingComponent
     {
         // This will be called once to set up the component
         // think of it as the setup() call in Arduino
-        ESP_LOGD("openthermGW_component", "Setup");
+        ESP_LOGD(TAG, "Setup");
 
         pinMode(thermostat_in_pin_, INPUT);
         digitalWrite(thermostat_in_pin_, HIGH); // pull up
@@ -48,7 +50,7 @@ class OpenthermGW: public PollingComponent
 
     void update() override
     {
-        ESP_LOGD("openthermgw_component", "update");
+        ESP_LOGD(LOGCOMP, "update");
     }
 
     void loop() override
@@ -64,7 +66,7 @@ class OpenthermGW: public PollingComponent
                 //Serial.print(F("-> "));
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
-                ESP_LOGD("openthermGW_component", "Message from thermostat");//: %1", message.id);
+                ESP_LOGD(LOGCOMP, "Message from thermostat");//: %1", message.id);
 
                 OPENTHERM::send(boiler_out_pin_, message); // forward message to boiler
                 mode = MODE_LISTEN_SLAVE;
@@ -82,13 +84,13 @@ class OpenthermGW: public PollingComponent
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
                 //Serial.println();
-                ESP_LOGD("openthermGW_component", "Message from boiler");// %1", message.id);
+                ESP_LOGD(LOGCOMP, "Message from boiler");// %1", message.id);
                 OPENTHERM::send(thermostat_out_pin_, message); // send message back to thermostat
                 mode = MODE_LISTEN_MASTER;
             }
             else if (OPENTHERM::isError())
             {
-                ESP_LOGD("openthermGW_component", "Message error");
+                ESP_LOGD(LOGCOMP, "Message error");
                 mode = MODE_LISTEN_MASTER;
                 // Serial.println(F("<- Timeout"));
                 // Serial.println();
