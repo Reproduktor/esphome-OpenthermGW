@@ -8,7 +8,7 @@ class OpenthermGW: public PollingComponent
 {
     private:
     const char *TAG = "openthermgw_component";
-    const char *LOGTOPIC = "openthermgw_component_05";
+    const char *LOGTOPIC = "openthermgw_component_07";
 
     protected:
     uint8_t master_in_pin_ = -1;
@@ -60,7 +60,7 @@ class OpenthermGW: public PollingComponent
         {
             if (OPENTHERM::isSent() || OPENTHERM::isIdle() || OPENTHERM::isError())
             {
-                OPENTHERM::listen(thermostat_in_pin_);
+                OPENTHERM::listen(master_in_pin_);
             }
             else if (OPENTHERM::getMessage(message))
             {
@@ -68,7 +68,7 @@ class OpenthermGW: public PollingComponent
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
                 ESP_LOGD(LOGTOPIC, "Message from thermostat type: %02hhx  id: %02hhx  HB: %02hhx  LB: %02hhx", message.type, message.id, message.valueHB, message.valueLB);
-                OPENTHERM::send(boiler_out_pin_, message); // forward message to boiler
+                OPENTHERM::send(slave_out_pin_, message); // forward message to boiler
                 ESP_LOGD(LOGTOPIC, "---> sent to boiler");//: %1", message.id);
                 mode = MODE_LISTEN_SLAVE;
             }
@@ -77,7 +77,9 @@ class OpenthermGW: public PollingComponent
         {
             if (OPENTHERM::isSent())
             {
-                OPENTHERM::listen(boiler_in_pin_, 800); // response need to be send back by boiler within 800ms
+                ESP_LOGD(LOGTOPIC, "waiting for response from boiler...");
+                OPENTHERM::listen(slave_in_pin_, 800); // response need to be send back by boiler within 800ms
+                ESP_LOGD(LOGTOPIC, "... finished waiting.");
             }
             else if (OPENTHERM::getMessage(message))
             {
@@ -86,7 +88,7 @@ class OpenthermGW: public PollingComponent
                 //Serial.println();
                 //Serial.println();
                 ESP_LOGD(LOGTOPIC, "Message from boiler type: %02hhx  id: %02hhx  HB: %02hhx  LB: %02hhx", message.type, message.id, message.valueHB, message.valueLB);
-                OPENTHERM::send(thermostat_out_pin_, message); // send message back to thermostat
+                OPENTHERM::send(master_out_pin_, message); // send message back to thermostat
                 ESP_LOGD(LOGTOPIC, "---> sent to thermostat");//: %1", message.id);
                 mode = MODE_LISTEN_MASTER;
             }
