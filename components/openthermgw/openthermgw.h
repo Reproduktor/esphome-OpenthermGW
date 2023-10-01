@@ -1,4 +1,5 @@
 #include "esphome.h"
+#include "esphome/components/sensor/sensor.h"
 #include "opentherm.h"
 
 namespace esphome {
@@ -56,10 +57,10 @@ class OpenthermGW: public PollingComponent
     void update() override
     {
         ESP_LOGD(LOGTOPIC, "update");
-        master_in_pin_sensor->publish_state(master_in_pin);
-        master_out_pin_sensor->publish_state(master_out_pin);
-        slave_in_pin_sensor->publish_state(slave_in_pin);
-        slave_out_pin_sensor->publish_state(slave_out_pin);
+        master_in_pin_sensor->publish_state(master_in_pin_);
+        master_out_pin_sensor->publish_state(master_out_pin_);
+        slave_in_pin_sensor->publish_state(slave_in_pin_);
+        slave_out_pin_sensor->publish_state(slave_out_pin_);
 
     }
 
