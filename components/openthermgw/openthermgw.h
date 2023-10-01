@@ -5,10 +5,9 @@ namespace esphome {
 namespace openthermgw {
 
 class OpenthermGW: public PollingComponent
-{
+
     private:
-    const char *TAG = "openthermgw_component";
-    const char *LOGTOPIC = "openthermgw_component_10";
+    const char *LOGTOPIC = "openthermgw_component_11";
 
     protected:
     uint8_t master_in_pin_ = -1;
@@ -23,6 +22,12 @@ class OpenthermGW: public PollingComponent
     OpenthermData message;
 
     public:
+
+    Sensor *master_in_pin_sensor = new Sensor();
+    Sensor *master_out_pin_sensor = new Sensor();
+    Sensor *slave_in_pin_sensor = new Sensor();
+    Sensor *slave_out_pin_sensor = new Sensor();
+
     void set_master_in_pin(uint8_t pin) { master_in_pin_ = pin; }
     void set_master_out_pin(uint8_t pin) { master_out_pin_ = pin; }
     void set_slave_in_pin(uint8_t pin) { slave_in_pin_ = pin; }
@@ -51,7 +56,11 @@ class OpenthermGW: public PollingComponent
     void update() override
     {
         ESP_LOGD(LOGTOPIC, "update");
-        ESP_LOGD(LOGTOPIC, "MIN: %d MOUT: %d SIN: %d SOUT: %d", master_in_pin_, master_out_pin_, slave_in_pin_, slave_out_pin_);
+        master_in_pin_sensor->publish_state(master_in_pin);
+        master_out_pin_sensor->publish_state(master_out_pin);
+        slave_in_pin_sensor->publish_state(slave_in_pin);
+        slave_out_pin_sensor->publish_state(slave_out_pin);
+
     }
 
     void loop() override
