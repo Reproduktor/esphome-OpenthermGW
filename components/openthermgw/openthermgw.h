@@ -1,6 +1,6 @@
 #include "esphome.h"
 //#include "esphome/components/sensor/sensor.h"
-#include "OpenTherm.h"
+#include "opentherm.h"
 
 namespace esphome {
 namespace openthermgw {
