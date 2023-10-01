@@ -64,7 +64,7 @@ class OpenthermGW: public PollingComponent
                 //Serial.print(F("-> "));
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
-                ESP_LOGD("openthermGW_component", "Message from thermostat: %1", message.u16());
+                ESP_LOGD("openthermGW_component", "Message from thermostat: %1", message.id);
 
                 OPENTHERM::send(boiler_out_pin_, message); // forward message to boiler
                 mode = MODE_LISTEN_SLAVE;
@@ -82,7 +82,7 @@ class OpenthermGW: public PollingComponent
                 //OPENTHERM::printToSerial(message);
                 //Serial.println();
                 //Serial.println();
-                ESP_LOGD("openthermGW_component", "Message from boiler %1", message.u16());
+                ESP_LOGD("openthermGW_component", "Message from boiler %1", message.id);
                 OPENTHERM::send(thermostat_out_pin_, message); // send message back to thermostat
                 mode = MODE_LISTEN_MASTER;
             }
