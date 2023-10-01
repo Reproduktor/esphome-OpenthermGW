@@ -8,7 +8,7 @@ namespace openthermgw {
 class OpenthermGW: public PollingComponent
 {
     private:
-    const char *LOGTOPIC = "openthermgw_component_11";
+    const char *LOGTOPIC = "openthermgw_component_12";
 
     protected:
     uint8_t master_in_pin_ = -1;
@@ -24,10 +24,10 @@ class OpenthermGW: public PollingComponent
 
     public:
 
-    Sensor *master_in_pin_sensor = new Sensor();
-    Sensor *master_out_pin_sensor = new Sensor();
-    Sensor *slave_in_pin_sensor = new Sensor();
-    Sensor *slave_out_pin_sensor = new Sensor();
+    sensor::Sensor *master_in_pin_sensor = new sensor::Sensor();
+    sensor::Sensor *master_out_pin_sensor = new sensor::Sensor();
+    sensor::Sensor *slave_in_pin_sensor = new sensor::Sensor();
+    sensor::Sensor *slave_out_pin_sensor = new sensor::Sensor();
 
     void set_master_in_pin(uint8_t pin) { master_in_pin_ = pin; }
     void set_master_out_pin(uint8_t pin) { master_out_pin_ = pin; }
