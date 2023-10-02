@@ -99,12 +99,12 @@ async def to_code(config):
     if CONF_SENSOR_STATUS_SLAVE_CHMODE in config:
         conf = config[CONF_SENSOR_STATUS_SLAVE_CHMODE]
         sens = await binary_sensor.new_binary_sensor(conf)
-        cg.add(var.set_sensor_status_slave_chmode(sens))
+        cg.add(var.set_sensor_status_slave_CHmode(sens))
 
     if CONF_SENSOR_STATUS_SLAVE_DHWMODE in config:
         conf = config[CONF_SENSOR_STATUS_SLAVE_DHWMODE]
         sens = await binary_sensor.new_binary_sensor(conf)
-        cg.add(var.set_sensor_status_slave_dhwmode(sens))
+        cg.add(var.set_sensor_status_slave_DHWmode(sens))
 
     if CONF_SENSOR_STATUS_SLAVE_FLAME in config:
         conf = config[CONF_SENSOR_STATUS_SLAVE_FLAME]
@@ -119,7 +119,7 @@ async def to_code(config):
     if CONF_SENSOR_STATUS_SLAVE_CH2MODE in config:
         conf = config[CONF_SENSOR_STATUS_SLAVE_CH2MODE]
         sens = await binary_sensor.new_binary_sensor(conf)
-        cg.add(var.set_sensor_status_slave_ch2mode(sens))
+        cg.add(var.set_sensor_status_slave_CH2mode(sens))
 
     if CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC in config:
         conf = config[CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC]

@@ -63,22 +63,22 @@ namespace openthermgw {
                     bool b = response & 0x01; // bit 0, Fault indication
                     if(sensor_status_slave_fault != nullptr)
                         sensor_status_slave_fault->publish_state(b);
-                    bool b = response & 0x02; // bit 1, CH mode
+                    b = response & 0x02; // bit 1, CH mode
                     if(sensor_status_slave_CHmode != nullptr)
                         sensor_status_slave_CHmode->publish_state(b);
-                    bool b = response & 0x4; // bit 2, DHW mode
+                    b = response & 0x4; // bit 2, DHW mode
                     if(sensor_status_slave_DHWmode != nullptr)
                         sensor_status_slave_DHWmode->publish_state(b);
-                    bool b = response & 0x8; // bit 3, Flame On
+                    b = response & 0x8; // bit 3, Flame On
                     if(sensor_status_slave_flame != nullptr)
                         sensor_status_slave_flame->publish_state(b);
-                    bool b = response & 0x10; // bit 4, Cooling status
+                    b = response & 0x10; // bit 4, Cooling status
                     if(sensor_status_slave_cooling != nullptr)
                         sensor_status_slave_cooling->publish_state(b);
-                    bool b = response & 0x20; // bit 5, CH2 mode
+                    b = response & 0x20; // bit 5, CH2 mode
                     if(sensor_status_slave_CH2mode != nullptr)
                         sensor_status_slave_CH2mode->publish_state(b);
-                    bool b = response & 0x40; // bit 6, Diagnostic indication
+                    b = response & 0x40; // bit 6, Diagnostic indication
                     if(sensor_status_slave_diagnostic != nullptr)
                         sensor_status_slave_diagnostic->publish_state(b);
 
