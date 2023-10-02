@@ -10,7 +10,7 @@ namespace esphome {
 namespace openthermgw {
 
 static const char *LOGTOPIC = "openthermgw_component_21";
-static const char *VERSION = "0.0.1.1"
+static const char *VERSION = "0.0.1.1";
 
 class OpenthermGW: public PollingComponent
 {
