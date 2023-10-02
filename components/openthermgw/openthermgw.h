@@ -55,7 +55,7 @@ class OpenthermGW: public PollingComponent
         {
             Serial.println("B" + String(response, HEX)); // slave/boiler response
             sOT->sendResponse(response);
-            ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, ot->statusToString(status));
+            ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
         }
     }
 
