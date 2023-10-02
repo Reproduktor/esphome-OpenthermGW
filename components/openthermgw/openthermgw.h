@@ -5,9 +5,6 @@
 namespace esphome {
 namespace openthermgw {
 
-OpenthermGW::OpenTherm *mOT;
-OpenthermGW::OpenTherm *sOT;
-
 class OpenthermGW: public PollingComponent
 {
     private:
@@ -97,6 +94,9 @@ class OpenthermGW: public PollingComponent
         sOT->process();        
     }
 };
+
+OpenthermGW::OpenTherm *mOT;
+OpenthermGW::OpenTherm *sOT;
 
 }
 }
