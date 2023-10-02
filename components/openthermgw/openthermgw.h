@@ -2,6 +2,10 @@
 #include "esphome/components/sensor/sensor.h"
 #include "opentherm.h"
 
+#ifndef OpenThermGW_h
+#define OpenThermGW_h
+
+
 namespace esphome {
 namespace openthermgw {
 
@@ -96,8 +100,8 @@ class OpenthermGW: public PollingComponent
     }
 };
 
-OpenTherm *OpenthermGW::mOT;
-OpenTherm *OpenthermGW::sOT;
 
 }
 }
+
+#endif // OpenThermGW_h
