@@ -2,7 +2,7 @@
 
 OpenTherm *esphome::openthermgw::OpenthermGW::mOT;
 OpenTherm *esphome::openthermgw::OpenthermGW::sOT;
-sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_boiler;
+esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_boiler;
 
 namespace esphome {
 namespace openthermgw {
