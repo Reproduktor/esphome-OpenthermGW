@@ -34,6 +34,14 @@ namespace openthermgw {
             //Serial.println("B" + String(response, HEX)); // slave/boiler response
             sOT->sendResponse(response);
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
+            if(sOT->getDataID(response) == Tboiler)
+            {
+                float t = sOT->getFloat(response);
+                ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", t);
+    
+                if(sensor_temp_boiler != nullptr)
+                    sensor_temp_boiler->publish_state(t);
+            }
         }
     }
 
@@ -58,8 +66,8 @@ namespace openthermgw {
     void OpenthermGW::update()
     {
         ESP_LOGD(LOGTOPIC, "update");
-        if(sensor_temp_boiler != nullptr)
-            sensor_temp_boiler->publish_state(28.3);
+        // if(sensor_temp_boiler != nullptr)
+        //     sensor_temp_boiler->publish_state(28.3);
     }
 
     void OpenthermGW::loop()
