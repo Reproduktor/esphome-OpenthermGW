@@ -19,8 +19,8 @@ class OpenthermGW: public PollingComponent
 
     public:
 
-    OpenTherm *mOT;
-    OpenTherm *sOT;
+    static OpenTherm *mOT = NULL;
+    static OpenTherm *sOT = NULL;
 
     sensor::Sensor *master_in_pin_sensor = new sensor::Sensor();
     sensor::Sensor *master_out_pin_sensor = new sensor::Sensor();
@@ -36,24 +36,25 @@ class OpenthermGW: public PollingComponent
     {
     }
 
-    void IRAM_ATTR mHandleInterrupt()
+    static void IRAM_ATTR mHandleInterrupt()
     {
         mOT->handleInterrupt();
     }
 
-    void IRAM_ATTR sHandleInterrupt()
+    static void IRAM_ATTR sHandleInterrupt()
     {
         sOT->handleInterrupt();
     }
 
-    void processRequest(unsigned long request, OpenThermResponseStatus status)
+    static void processRequest(unsigned long request, OpenThermResponseStatus status)
     {
-        Serial.println("T" + String(request, HEX)); // master/thermostat request
+        ESP_LOGD(LOGTOPIC, "Opentherm request [request: %d]", request);
         unsigned long response = mOT->sendRequest(request);
         if (response)
         {
             Serial.println("B" + String(response, HEX)); // slave/boiler response
             sOT->sendResponse(response);
+            ESP_LOGD(LOGTOPIC "Opentherm response [response: %d, status %s", response, ot->statusToString(status));
         }
     }
 
@@ -71,16 +72,16 @@ class OpenthermGW: public PollingComponent
         mOT = new OpenTherm(slave_in_pin_, slave_out_pin_); // master OT is paired with SLAVE pins (thermostat)
         sOT = new OpenTherm(master_in_pin_, master_out_pin_, true);
 
-//        mOT->begin(this->mHandleInterrupt);
-//        sOT->begin(this->sHandleInterrupt, this->processRequest);
-        mOT->begin([this]()
+        mOT->begin(mHandleInterrupt);
+        sOT->begin(sHandleInterrupt, processRequest);
+/*        mOT->begin([this]()
             {
                 mOT->handleInterrupt();
             });
         sOT->begin([this]()
             {
                 sOT->handleInterrupt();
-            }, this->processRequest);
+            }, this->processRequest); */
     }
 
     void update() override
