@@ -41,7 +41,7 @@ namespace openthermgw {
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
             switch(sOT->getDataID(response))
             {
-                Tboiler:
+                case Tboiler:
                 {
                     float f = sOT->getFloat(response);
                     ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", f);
@@ -51,7 +51,7 @@ namespace openthermgw {
 
                     break;
                 }
-                RelModLevel:
+                case RelModLevel:
                 {
                     float f = sOT->getFloat(response);
                     ESP_LOGD(LOGTOPIC, "Opentherm response - RelModLevel [%f]", f);
