@@ -53,13 +53,13 @@ class OpenthermGW: public PollingComponent
     //void set_sensor_version(text_sensor::TextSensor *s) { sensor_version = s; }
     void set_sensor_temp_boiler(sensor::Sensor *s) { sensor_temp_boiler = s; }
     void set_sensor_modulationlevel_boiler(sensor::Sensor *s)                       { sensor_modulationlevel_boiler         = s; }
-    void set_sensor_sensor_status_slave_fault(binary_sensor::BinarySensor *s)       { sensor_status_slave_fault             = s; }
-    void set_sensor_sensor_status_slave_CHmode(binary_sensor::BinarySensor *s)      { sensor_status_slave_CHmode            = s; }
-    void set_sensor_sensor_status_slave_DHWmode(binary_sensor::BinarySensor *s)     { sensor_status_slave_DHWmode           = s; }
-    void set_sensor_sensor_status_slave_flame(binary_sensor::BinarySensor *s)       { sensor_status_slave_flame             = s; }
-    void set_sensor_sensor_status_slave_cooling(binary_sensor::BinarySensor *s)     { sensor_status_slave_cooling           = s; }
-    void set_sensor_sensor_status_slave_CH2mode(binary_sensor::BinarySensor *s)     { sensor_status_slave_CH2mode           = s; }
-    void set_sensor_sensor_status_slave_diagnostic(binary_sensor::BinarySensor *s)  { sensor_status_slave_diagnostic        = s; }
+    void set_sensor_status_slave_fault(binary_sensor::BinarySensor *s)       { sensor_status_slave_fault             = s; }
+    void set_sensor_status_slave_CHmode(binary_sensor::BinarySensor *s)      { sensor_status_slave_CHmode            = s; }
+    void set_sensor_status_slave_DHWmode(binary_sensor::BinarySensor *s)     { sensor_status_slave_DHWmode           = s; }
+    void set_sensor_status_slave_flame(binary_sensor::BinarySensor *s)       { sensor_status_slave_flame             = s; }
+    void set_sensor_status_slave_cooling(binary_sensor::BinarySensor *s)     { sensor_status_slave_cooling           = s; }
+    void set_sensor_status_slave_CH2mode(binary_sensor::BinarySensor *s)     { sensor_status_slave_CH2mode           = s; }
+    void set_sensor_status_slave_diagnostic(binary_sensor::BinarySensor *s)  { sensor_status_slave_diagnostic        = s; }
 
     OpenthermGW();
 
