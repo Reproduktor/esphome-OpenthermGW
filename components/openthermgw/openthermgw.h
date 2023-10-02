@@ -42,7 +42,7 @@ class OpenthermGW: public PollingComponent
     void set_slave_out_pin(uint8_t pin);
     
     //void set_sensor_version(text_sensor::TextSensor *s) { sensor_version = s; }
-    void set_sensor_temp_boiler(sensor::Sensor *s) {{ sensor_temp_boiler = s; }}
+    void set_sensor_temp_boiler(sensor::Sensor *s) { sensor_temp_boiler = s; }
 
     OpenthermGW();
 

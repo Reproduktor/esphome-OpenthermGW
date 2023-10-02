@@ -31,7 +31,7 @@ namespace openthermgw {
         unsigned long response = mOT->sendRequest(request);
         if (response)
         {
-            Serial.println("B" + String(response, HEX)); // slave/boiler response
+            //Serial.println("B" + String(response, HEX)); // slave/boiler response
             sOT->sendResponse(response);
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
         }
@@ -58,7 +58,7 @@ namespace openthermgw {
     void OpenthermGW::update()
     {
         ESP_LOGD(LOGTOPIC, "update");
-        this->sensor_temp_boiler->publish_state(28.3);
+        //this->sensor_temp_boiler->publish_state(28.3);
     }
 
     void OpenthermGW::loop()
