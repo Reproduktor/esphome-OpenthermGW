@@ -15,17 +15,17 @@ namespace openthermgw {
     {
     }
 
-    static void IRAM_ATTR OpenthermGW::mHandleInterrupt()
+    void IRAM_ATTR OpenthermGW::mHandleInterrupt()
     {
         mOT->handleInterrupt();
     }
 
-    static void IRAM_ATTR OpenthermGW::sHandleInterrupt()
+    void IRAM_ATTR OpenthermGW::sHandleInterrupt()
     {
         sOT->handleInterrupt();
     }
 
-    static void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
+    void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
     {
         ESP_LOGD(LOGTOPIC, "Opentherm request [request: %d]", request);
         unsigned long response = mOT->sendRequest(request);
