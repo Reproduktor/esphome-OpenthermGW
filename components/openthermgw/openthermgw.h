@@ -8,7 +8,7 @@ namespace openthermgw {
 class OpenthermGW: public PollingComponent
 {
     private:
-    const char *LOGTOPIC = "openthermgw_component_17";
+    const char *LOGTOPIC = "openthermgw_component_18";
 
     protected:
     uint8_t master_in_pin_ = -1;
@@ -16,8 +16,8 @@ class OpenthermGW: public PollingComponent
     uint8_t slave_in_pin_ = -1;
     uint8_t slave_out_pin_ = -1;
 
-    OpenTherm *mOT;
-    OpenTherm *sOT;
+    static OpenTherm *mOT;
+    static OpenTherm *sOT;
 
     public:
 
@@ -45,7 +45,7 @@ class OpenthermGW: public PollingComponent
         sOT->handleInterrupt();
     }
 
-    void processRequest(unsigned long request, OpenThermResponseStatus status)
+    static void processRequest(unsigned long request, OpenThermResponseStatus status)
     {
         Serial.println("T" + String(request, HEX)); // master/thermostat request
         unsigned long response = mOT->sendRequest(request);
