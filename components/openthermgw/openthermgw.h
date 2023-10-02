@@ -1,6 +1,6 @@
 #include "esphome.h"
 #include "esphome/components/sensor/sensor.h"
-#include "OpenTherm.h"
+#include "opentherm.h"
 
 namespace esphome {
 namespace openthermgw {
@@ -8,7 +8,7 @@ namespace openthermgw {
 class OpenthermGW: public PollingComponent
 {
     private:
-    const char *LOGTOPIC = "openthermgw_component_15";
+    const char *LOGTOPIC = "openthermgw_component_16";
 
     protected:
     uint8_t master_in_pin_ = -1;
