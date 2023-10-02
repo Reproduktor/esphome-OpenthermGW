@@ -96,8 +96,8 @@ class OpenthermGW: public PollingComponent
     }
 };
 
-OpenthermGW::OpenTherm *mOT;
-OpenthermGW::OpenTherm *sOT;
+OpenTherm *OpenthermGW::mOT;
+OpenTherm *OpenthermGW::sOT;
 
 }
 }
