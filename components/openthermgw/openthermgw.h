@@ -71,8 +71,16 @@ class OpenthermGW: public PollingComponent
         mOT = new OpenTherm(slave_in_pin_, slave_out_pin_); // master OT is paired with SLAVE pins (thermostat)
         sOT = new OpenTherm(master_in_pin_, master_out_pin_, true);
 
-        mOT->begin(this->mHandleInterrupt);
-        sOT->begin(this->sHandleInterrupt, this->processRequest);
+//        mOT->begin(this->mHandleInterrupt);
+//        sOT->begin(this->sHandleInterrupt, this->processRequest);
+        mOT->begin([this](unsigned long response, OpenThermResponseStatus status)
+            {
+                mOT->handleInterrupt();
+            });
+        sOT->begin([this](unsigned long response, OpenThermResponseStatus status)
+            {
+                sOT->handleInterrupt();
+            }, this->processRequest);
     }
 
     void update() override
