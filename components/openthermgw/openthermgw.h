@@ -8,7 +8,7 @@ namespace openthermgw {
 class OpenthermGW: public PollingComponent
 {
     private:
-    const char *LOGTOPIC = "openthermgw_component_19";
+    static const char *LOGTOPIC = "openthermgw_component_19";
 
     protected:
     uint8_t master_in_pin_ = -1;
