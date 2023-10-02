@@ -53,14 +53,6 @@ namespace openthermgw {
 
         mOT->begin(mHandleInterrupt);
         sOT->begin(sHandleInterrupt, processRequest);
-/*        mOT->begin([this]()
-            {
-                mOT->handleInterrupt();
-            });
-        sOT->begin([this]()
-            {
-                sOT->handleInterrupt();
-            }, this->processRequest); */
     }
 
     void OpenthermGW::update()
