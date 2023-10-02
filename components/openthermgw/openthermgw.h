@@ -8,7 +8,7 @@ namespace openthermgw {
 class OpenthermGW: public PollingComponent
 {
     private:
-    const char *LOGTOPIC = "openthermgw_component_16";
+    const char *LOGTOPIC = "openthermgw_component_17";
 
     protected:
     uint8_t master_in_pin_ = -1;
@@ -37,22 +37,22 @@ class OpenthermGW: public PollingComponent
 
     void IRAM_ATTR mHandleInterrupt()
     {
-        mOT.handleInterrupt();
+        mOT->handleInterrupt();
     }
 
     void IRAM_ATTR sHandleInterrupt()
     {
-        sOT.handleInterrupt();
+        sOT->handleInterrupt();
     }
 
     void processRequest(unsigned long request, OpenThermResponseStatus status)
     {
         Serial.println("T" + String(request, HEX)); // master/thermostat request
-        unsigned long response = mOT.sendRequest(request);
+        unsigned long response = mOT->sendRequest(request);
         if (response)
         {
             Serial.println("B" + String(response, HEX)); // slave/boiler response
-            sOT.sendResponse(response);
+            sOT->sendResponse(response);
         }
     }
 
@@ -70,8 +70,8 @@ class OpenthermGW: public PollingComponent
         mOT = new OpenTherm(slave_in_pin_, slave_out_pin_); // master OT is paired with SLAVE pins (thermostat)
         sOT = new OpenTherm(master_in_pin_, master_out_pin_, true);
 
-        mOT.begin(mHandleInterrupt);
-        sOT.begin(sHandleInterrupt, processRequest);
+        mOT->begin(mHandleInterrupt);
+        sOT->begin(sHandleInterrupt, processRequest);
     }
 
     void update() override
@@ -81,7 +81,7 @@ class OpenthermGW: public PollingComponent
 
     void loop() override
     {
-        sOT.process();        
+        sOT->process();        
     }
 };
 
