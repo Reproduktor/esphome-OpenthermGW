@@ -6,9 +6,6 @@ OpenTherm *esphome::openthermgw::OpenthermGW::sOT;
 namespace esphome {
 namespace openthermgw {
 
-static const char *LOGTOPIC = "openthermgw_component_20";
-
-
     void OpenthermGW::set_master_in_pin(uint8_t pin) { master_in_pin_ = pin; }
     void OpenthermGW::set_master_out_pin(uint8_t pin) { master_out_pin_ = pin; }
     void OpenthermGW::set_slave_in_pin(uint8_t pin) { slave_in_pin_ = pin; }
@@ -40,7 +37,7 @@ static const char *LOGTOPIC = "openthermgw_component_20";
         }
     }
 
-    void OpenthermGW::setup() override
+    void OpenthermGW::setup()
     {
         // This will be called once to set up the component
         // think of it as the setup() call in Arduino
@@ -66,12 +63,12 @@ static const char *LOGTOPIC = "openthermgw_component_20";
             }, this->processRequest); */
     }
 
-    void OpenthermGW::update() override
+    void OpenthermGW::update()
     {
         ESP_LOGD(LOGTOPIC, "update");
     }
 
-    void OpenthermGW::loop() override
+    void OpenthermGW::loop()
     {
         sOT->process();        
     }
