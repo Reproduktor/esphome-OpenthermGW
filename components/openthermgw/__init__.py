@@ -2,7 +2,7 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import climate, sensor
+from esphome.components import climate, sensor, text_sensor
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
@@ -55,7 +55,7 @@ async def to_code(config):
 
     if CONF_SENSOR_VERSION in config:
         conf = config[CONF_SENSOR_VERSION]
-        sens = await sensor.new_sensor(conf)
+        sens = await text_sensor.new_sensor(conf)
         cg.add(var.set_sensor_version(sens))
 
 
