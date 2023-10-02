@@ -31,7 +31,11 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_MASTER_OUT_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_IN_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_OUT_PIN): pins.internal_gpio_input_pin_number,
-        cv.Optional(CONF_SENSOR_VERSION): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1).extend(),
+        cv.Optional(CONF_SENSOR_VERSION): sensor.sensor_schema(
+            unit_of_measurement=UNIT_EMPTY,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_EMPTY,
+            state_class=STATE_CLASS_MEASUREMENT).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
