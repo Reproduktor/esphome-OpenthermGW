@@ -22,6 +22,7 @@ MULTI_CONF = False
 
 CONF_SENSOR_VERSION = "version"
 CONF_SENSOR_TEMP_BOILER = "temp_boiler"
+CONF_SENSOR_TEMP_DHW = "temp_dhw"
 CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 CONF_SENSOR_STATUS_SLAVE_FAULT = "status_slave_fault"
 CONF_SENSOR_STATUS_SLAVE_CHMODE = "status_slave_chmode"
@@ -39,6 +40,11 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_SLAVE_IN_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_OUT_PIN): pins.internal_gpio_input_pin_number,
         cv.Optional(CONF_SENSOR_TEMP_BOILER): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_EMPTY,
+            state_class=STATE_CLASS_MEASUREMENT).extend(),
+        cv.Optional(CONF_SENSOR_TEMP_DHW): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             accuracy_decimals=1,
             device_class=DEVICE_CLASS_EMPTY,
@@ -85,6 +91,11 @@ async def to_code(config):
         conf = config[CONF_SENSOR_TEMP_BOILER]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_sensor_temp_boiler(sens))
+
+    if CONF_SENSOR_TEMP_DHW in config:
+        conf = config[CONF_SENSOR_TEMP_DHW]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_sensor_temp_dhw(sens))
 
     if CONF_SENSOR_MODULATIONLEVEL_BOILER in config:
         conf = config[CONF_SENSOR_MODULATIONLEVEL_BOILER]

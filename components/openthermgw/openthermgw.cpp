@@ -3,6 +3,7 @@
 OpenTherm *esphome::openthermgw::OpenthermGW::mOT;
 OpenTherm *esphome::openthermgw::OpenthermGW::sOT;
 esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_boiler;
+esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_dhw;
 esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_modulationlevel_boiler;
 esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_status_slave_fault;
 esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_status_slave_CHmode;
@@ -94,6 +95,16 @@ namespace openthermgw {
 
                     break;
                 }
+                case Tdhw:
+                {
+                    float f = sOT->getFloat(response);
+                    ESP_LOGD(LOGTOPIC, "Opentherm response - Tdhw [%f]", f);
+        
+                    if(sensor_temp_dhw != nullptr)
+                        sensor_temp_dhw->publish_state(f);
+
+                    break;
+                }
                 case RelModLevel:
                 {
                     float f = sOT->getFloat(response);
@@ -104,6 +115,7 @@ namespace openthermgw {
 
                     break;
                 }
+                case 
             }
         }
     }
