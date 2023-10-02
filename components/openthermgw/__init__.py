@@ -15,7 +15,7 @@ CONF_SLAVE_OUT_PIN = "slave_out_pin"
 CONF_OPENTHERM_ID = "opentherm_id"
 
 opentherm_ns = cg.esphome_ns.namespace("openthermgw")
-OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component, cg.esphome_ns.namespace("text_sensor").class_("TextSensor"))
+OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 
 AUTO_LOAD = ['binary_sensor']
 MULTI_CONF = False

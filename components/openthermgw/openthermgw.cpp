@@ -43,7 +43,7 @@ namespace openthermgw {
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
             switch(sOT->getDataID(response))
             {
-/*                case 0:
+                case 0:
                 {
                     ESP_LOGD(LOGTOPIC, "Opentherm response - Status [%x]", response & 0xff);
 
@@ -52,7 +52,7 @@ namespace openthermgw {
                         sensor_status_slave_flame->publish_state(b);
 
                     break;
-                } */
+                }
                 case Tboiler:
                 {
                     float f = sOT->getFloat(response);
