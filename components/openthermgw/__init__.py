@@ -44,6 +44,8 @@ async def to_code(config):
     cg.add(var.set_slave_in_pin(config[CONF_SLAVE_IN_PIN]))
     cg.add(var.set_slave_out_pin(config[CONF_SLAVE_OUT_PIN]))
 
+    cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
+
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.
