@@ -1,4 +1,4 @@
 #include "openthermgw.h"
 
-OpenTherm *OpenthermGW::mOT;
-OpenTherm *OpenthermGW::sOT;
+OpenTherm *esphome::openthermgw::OpenthermGW::mOT;
+OpenTherm *esphome::openthermgw::OpenthermGW::sOT;
