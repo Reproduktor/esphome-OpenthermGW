@@ -3,6 +3,7 @@
 OpenTherm *esphome::openthermgw::OpenthermGW::mOT;
 OpenTherm *esphome::openthermgw::OpenthermGW::sOT;
 esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_boiler;
+esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_modulationlevel_boiler;
 
 namespace esphome {
 namespace openthermgw {
@@ -38,14 +39,26 @@ namespace openthermgw {
             //Serial.println("B" + String(response, HEX)); // slave/boiler response
             sOT->sendResponse(response);
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
-            if(sOT->getDataID(response) == Tboiler)
+            switch(sOT->getDataID(response))
             {
-                float t = sOT->getFloat(response);
-                ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", t);
-    
-                if(sensor_temp_boiler != nullptr)
-                    sensor_temp_boiler->publish_state(t);
-            }
+                Tboiler:
+                {
+                    float f = sOT->getFloat(response);
+                    ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", f);
+        
+                    if(sensor_temp_boiler != nullptr)
+                        sensor_temp_boiler->publish_state(f);
+
+                    break;
+                }
+                RelModLevel:
+                {
+                    float f = sOT->getFloat(response);
+                    ESP_LOGD(LOGTOPIC, "Opentherm response - RelModLevel [%f]", f);
+        
+                    if(sensor_temp_boiler != nullptr)
+                        sensor_modulationlevel_boiler->publish_state(f);
+                }
         }
     }
 
