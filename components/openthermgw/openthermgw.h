@@ -5,10 +5,11 @@
 namespace esphome {
 namespace openthermgw {
 
+static const char *LOGTOPIC = "openthermgw_component_20";
+
 class OpenthermGW: public PollingComponent
 {
     private:
-    static const char *LOGTOPIC = "openthermgw_component_19";
 
     protected:
     uint8_t master_in_pin_ = -1;
