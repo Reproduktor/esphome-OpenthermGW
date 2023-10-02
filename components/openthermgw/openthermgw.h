@@ -73,11 +73,11 @@ class OpenthermGW: public PollingComponent
 
 //        mOT->begin(this->mHandleInterrupt);
 //        sOT->begin(this->sHandleInterrupt, this->processRequest);
-        mOT->begin([this](void)->(void)
+        mOT->begin([this](void)->void
             {
                 mOT->handleInterrupt();
             });
-        sOT->begin([this](void)->(void)
+        sOT->begin([this](void)->void
             {
                 sOT->handleInterrupt();
             }, this->processRequest);
