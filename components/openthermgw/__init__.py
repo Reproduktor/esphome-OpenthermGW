@@ -17,7 +17,7 @@ CONF_OPENTHERM_ID = "opentherm_id"
 opentherm_ns = cg.esphome_ns.namespace("openthermgw")
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 
-
+AUTO_LOAD = ['binary_sensor']
 MULTI_CONF = False
 
 CONF_SENSOR_VERSION = "version"
