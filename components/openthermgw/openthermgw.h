@@ -5,6 +5,9 @@
 namespace esphome {
 namespace openthermgw {
 
+OpenthermGW::OpenTherm *mOT;
+OpenthermGW::OpenTherm *sOT;
+
 class OpenthermGW: public PollingComponent
 {
     private:
@@ -19,8 +22,8 @@ class OpenthermGW: public PollingComponent
 
     public:
 
-    static OpenTherm *mOT = NULL;
-    static OpenTherm *sOT = NULL;
+    static OpenTherm *mOT;
+    static OpenTherm *sOT;
 
     sensor::Sensor *master_in_pin_sensor = new sensor::Sensor();
     sensor::Sensor *master_out_pin_sensor = new sensor::Sensor();
