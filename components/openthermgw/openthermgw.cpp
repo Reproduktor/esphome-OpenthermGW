@@ -58,7 +58,8 @@ namespace openthermgw {
     void OpenthermGW::update()
     {
         ESP_LOGD(LOGTOPIC, "update");
-        this->sensor_temp_boiler->publish_state(28.3);
+        if(sensor_temp_boiler != nullptr)
+            sensor_temp_boiler->publish_state(28.3);
     }
 
     void OpenthermGW::loop()
