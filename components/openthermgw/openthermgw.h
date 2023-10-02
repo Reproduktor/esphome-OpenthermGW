@@ -1,6 +1,6 @@
 #include "esphome.h"
 #include "esphome/components/sensor/sensor.h"
-#include "opentherm.h"
+#include "OpenTherm.h"
 
 namespace esphome {
 namespace openthermgw {
@@ -8,7 +8,7 @@ namespace openthermgw {
 class OpenthermGW: public PollingComponent
 {
     private:
-    const char *LOGTOPIC = "openthermgw_component_13";
+    const char *LOGTOPIC = "openthermgw_component_14";
 
     protected:
     uint8_t master_in_pin_ = -1;
@@ -16,11 +16,8 @@ class OpenthermGW: public PollingComponent
     uint8_t slave_in_pin_ = -1;
     uint8_t slave_out_pin_ = -1;
 
-    #define MODE_LISTEN_MASTER 0
-    #define MODE_LISTEN_SLAVE 1
-
-    int mode = 0;
-    OpenthermData message;
+    OpenTherm *mOT;
+    OpenTherm *sOT;
 
     public:
 
@@ -38,78 +35,53 @@ class OpenthermGW: public PollingComponent
     {
     }
 
+    void IRAM_ATTR mHandleInterrupt()
+    {
+        mOT.handleInterrupt();
+    }
+
+    void IRAM_ATTR sHandleInterrupt()
+    {
+        sOT.handleInterrupt();
+    }
+
+    void processRequest(unsigned long request, OpenThermResponseStatus status)
+    {
+        Serial.println("T" + String(request, HEX)); // master/thermostat request
+        unsigned long response = mOT.sendRequest(request);
+        if (response)
+        {
+            Serial.println("B" + String(response, HEX)); // slave/boiler response
+            sOT.sendResponse(response);
+        }
+    }
+
     void setup() override
     {
         // This will be called once to set up the component
         // think of it as the setup() call in Arduino
         ESP_LOGD(LOGTOPIC, "Setup");
 
-        pinMode(master_in_pin_, INPUT);
-        digitalWrite(master_in_pin_, HIGH); // pull up
-        digitalWrite(master_out_pin_, HIGH);
-        pinMode(master_out_pin_, OUTPUT); // low output = high current, high output = low current
-        pinMode(slave_in_pin_, INPUT);
-        digitalWrite(slave_in_pin_, HIGH); // pull up
-        digitalWrite(slave_out_pin_, HIGH);
-        pinMode(slave_out_pin_, OUTPUT); // low output = high voltage, high output = low voltage
         master_in_pin_sensor->publish_state(master_in_pin_);
         master_out_pin_sensor->publish_state(master_out_pin_);
         slave_in_pin_sensor->publish_state(slave_in_pin_);
         slave_out_pin_sensor->publish_state(slave_out_pin_);
+
+        mOT = new OpenTherm(slave_in_pin_, slave_out_pin_); // master OT is paired with SLAVE pins (thermostat)
+        sOT = new OpenTherm(master_in_pin_, master_out_pin_, true);
+
+        mOT.begin(mHandleInterrupt);
+        sOT.begin(sHandleInterrupt, processRequest);
     }
 
     void update() override
     {
         ESP_LOGD(LOGTOPIC, "update");
-
     }
 
     void loop() override
     {
-        if (mode == MODE_LISTEN_MASTER)
-        {
-            if (OPENTHERM::isSent() || OPENTHERM::isIdle() || OPENTHERM::isError())
-            {
-                OPENTHERM::listen(master_in_pin_);
-            }
-            else if (OPENTHERM::getMessage(message))
-            {
-                //Serial.print(F("-> "));
-                //OPENTHERM::printToSerial(message);
-                //Serial.println();
-                //ESP_LOGD(LOGTOPIC, "Message from thermostat type: %02hhx  id: %02hhx  HB: %02hhx  LB: %02hhx", message.type, message.id, message.valueHB, message.valueLB);
-                OPENTHERM::send(slave_out_pin_, message); // forward message to boiler
-                //ESP_LOGD(LOGTOPIC, "---> sent to boiler");//: %1", message.id);
-                mode = MODE_LISTEN_SLAVE;
-            }
-        }
-        else if (mode == MODE_LISTEN_SLAVE)
-        {
-            if (OPENTHERM::isSent())
-            {
-                //ESP_LOGD(LOGTOPIC, "waiting for response from boiler...");
-                OPENTHERM::listen(slave_in_pin_, 800); // response need to be send back by boiler within 800ms
-                //ESP_LOGD(LOGTOPIC, "... finished waiting.");
-            }
-            else if (OPENTHERM::getMessage(message))
-            {
-                //Serial.print(F("<- "));
-                //OPENTHERM::printToSerial(message);
-                //Serial.println();
-                //Serial.println();
-                //ESP_LOGD(LOGTOPIC, "Message from boiler type: %02hhx  id: %02hhx  HB: %02hhx  LB: %02hhx", message.type, message.id, message.valueHB, message.valueLB);
-                OPENTHERM::send(master_out_pin_, message); // send message back to thermostat
-                //ESP_LOGD(LOGTOPIC, "---> sent to thermostat");//: %1", message.id);
-                mode = MODE_LISTEN_MASTER;
-            }
-            else if (OPENTHERM::isError())
-            {
-                ESP_LOGD(LOGTOPIC, "Message error");
-                mode = MODE_LISTEN_MASTER;
-                // Serial.println(F("<- Timeout"));
-                // Serial.println();
-            }
-        }
+        sOT.process();        
     }
 };
 

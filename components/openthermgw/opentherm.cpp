@@ -1,547 +1,408 @@
-#include "opentherm.h"
-#include "Arduino.h"
+/*
+OpenTherm.cpp - OpenTherm Communication Library For Arduino, ESP8266
+Copyright 2018, Ihor Melnyk
+*/
 
-#define MODE_IDLE 0     // no operation
+#include "OpenTherm.h"
 
-#define MODE_LISTEN 1   // waiting for transmission to start
-#define MODE_READ 2     // reading 32-bit data frame
-#define MODE_RECEIVED 3 // data frame received with valid start and stop bit
-
-#define MODE_WRITE 4    // writing data with timer
-#define MODE_SENT 5     // all data written to output
-
-#define MODE_ERROR_MANCH 8  // manchester protocol data transfer error
-#define MODE_ERROR_TOUT 9   // read timeout
-
-byte OPENTHERM::_pin = 0;
-void (*OPENTHERM::_callback)() = NULL;
-
-volatile byte OPENTHERM::_mode = MODE_IDLE;
-volatile unsigned int OPENTHERM::_capture = 0;
-volatile byte OPENTHERM::_clock = 0;
-volatile byte OPENTHERM::_bitPos = 0;
-volatile unsigned long OPENTHERM::_data = 0;
-volatile bool OPENTHERM::_active = false;
-volatile int OPENTHERM::_timeoutCounter = -1;
-
-#define STOP_BIT_POS 33
-
-void OPENTHERM::listen(byte pin, int timeout, void (*callback)()) {
-  _stop();
-  _pin = pin;
-  _timeoutCounter = timeout * 5; // timer ticks at 5 ticks/ms
-  _callback = callback;
-
-  _listen();
+OpenTherm::OpenTherm(int inPin, int outPin, bool isSlave):
+	status(OpenThermStatus::NOT_INITIALIZED),
+	inPin(inPin),
+	outPin(outPin),
+	isSlave(isSlave),
+	response(0),
+	responseStatus(OpenThermResponseStatus::NONE),
+	responseTimestamp(0),
+	handleInterruptCallback(NULL),
+	processResponseCallback(NULL)
+{
 }
 
-void OPENTHERM::_listen() {
-  _stopTimer();
-  _mode = MODE_LISTEN;
-  _active = true;
-  _data = 0;
-  _bitPos = 0;
-
-  _startReadTimer();
+void OpenTherm::begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus))
+{
+	pinMode(inPin, INPUT);
+	pinMode(outPin, OUTPUT);
+	if (handleInterruptCallback != NULL) {
+		this->handleInterruptCallback = handleInterruptCallback;
+		attachInterrupt(digitalPinToInterrupt(inPin), handleInterruptCallback, CHANGE);
+	}
+	activateBoiler();
+	status = OpenThermStatus::READY;
+	this->processResponseCallback = processResponseCallback;
 }
 
-void OPENTHERM::send(byte pin, OpenthermData &data, void (*callback)()) {
-  _stop();
-  _pin = pin;
-  _callback = callback;
-
-  _data = data.type;
-  _data = (_data << 12) | data.id;
-  _data = (_data << 8) | data.valueHB;
-  _data = (_data << 8) | data.valueLB;
-  if (!_checkParity(_data)) {
-    _data = _data | 0x80000000;
-  }
-
-  _clock = 1; // clock starts at HIGH
-  _bitPos = 33; // count down (33 == start bit, 32-1 data, 0 == stop bit)
-  _mode = MODE_WRITE;
-
-  _active = true;
-  _startWriteTimer();
+void OpenTherm::begin(void(*handleInterruptCallback)(void))
+{
+	begin(handleInterruptCallback, NULL);
 }
 
-bool OPENTHERM::getMessage(OpenthermData &data) {
-  if (_mode == MODE_RECEIVED) {
-    data.type = (_data >> 28) & 0x7;
-    data.id = (_data >> 16) & 0xFF;
-    data.valueHB = (_data >> 8) & 0xFF;
-    data.valueLB = _data & 0xFF;
-    return true;
-  }
-  return false;
+bool IRAM_ATTR OpenTherm::isReady()
+{
+	return status == OpenThermStatus::READY;
 }
 
-void OPENTHERM::stop() {
-  _stop();
-  _mode = MODE_IDLE;
+int IRAM_ATTR OpenTherm::readState() {
+	return digitalRead(inPin);
 }
 
-void OPENTHERM::_stop() {
-  if (_active) {
-    _stopTimer();
-    _active = false;
-  }
+void OpenTherm::setActiveState() {
+	digitalWrite(outPin, LOW);
 }
 
-void OPENTHERM::_read() {
-  _data = 0;
-  _bitPos = 0;
-  _mode = MODE_READ;
-  _capture = 1; // reset counter and add as if read start bit
-  _clock = 1; // clock is high at the start of comm
-  _startReadTimer(); // get us into 1/4 of manchester code
+void OpenTherm::setIdleState() {
+	digitalWrite(outPin, HIGH);
 }
 
-void OPENTHERM::_timerISR() {
-  if (_mode == MODE_LISTEN) {
-    if (_timeoutCounter == 0) {
-      _mode = MODE_ERROR_TOUT;
-      _stop();
-      return;
-    }
-    byte value = digitalRead(_pin);
-    if (value == 1) { // incoming data (rising signal)
-      _read();
-    }
-    if (_timeoutCounter > 0) {
-      _timeoutCounter --;
-    }
-  }
-  else if (_mode == MODE_READ) {
-    byte value = digitalRead(_pin);
-    byte last = (_capture & 1);
-    if (value != last) {
-      // transition of signal from last sampling
-      if (_clock == 1 && _capture > 0xF) {
-        // no transition in the middle of the bit
-        _listen();
-      }
-      else if (_clock == 1 || _capture > 0xF) {
-        // transition in the middle of the bit OR no transition between two bit, both are valid data points
-        if (_bitPos == STOP_BIT_POS) {
-          // expecting stop bit
-          if (_verifyStopBit(last)) {
-            _mode = MODE_RECEIVED;
-            _stop();
-            _callCallback();
-          }
-          else {
-            // end of data not verified, invalid data
-            _listen();
-          }
-        }
-        else {
-          // normal data point at clock high
-          _bitRead(last);
-          _clock = 0;
-        }
-      }
-      else {
-        // clock low, not a data point, switch clock
-        _clock = 1;
-      }
-      _capture = 1; // reset counter
-    }
-    else if (_capture > 0xFF) {
-      // no change for too long, invalid mancheter encoding
-      _listen();
-    }
-    _capture = (_capture << 1) | value;
-  }
-  else if (_mode == MODE_WRITE) {
-    // write data to pin
-    if (_bitPos == 33 || _bitPos == 0)  { // start bit
-      _writeBit(1, _clock);
-    }
-    else { // data bits
-      _writeBit(bitRead(_data, _bitPos - 1), _clock);
-    }
-    if (_clock == 0) {
-      if (_bitPos <= 0) { // check termination
-        _mode = MODE_SENT; // all data written
-        _stop();
-        _callCallback();
-      }
-      _bitPos--;
-      _clock = 1;
-    }
-    else {
-      _clock = 0;
-    }
-  }
+void OpenTherm::activateBoiler() {
+	setIdleState();
+	delay(1000);
 }
 
-void OPENTHERM::_bitRead(byte value) {
-  _data = (_data << 1) | value;
-  _bitPos ++;
+void OpenTherm::sendBit(bool high) {
+	if (high) setActiveState(); else setIdleState();
+	delayMicroseconds(500);
+	if (high) setIdleState(); else setActiveState();
+	delayMicroseconds(500);
 }
 
-bool OPENTHERM::_verifyStopBit(byte value) {
-  if (value == HIGH) { // stop bit detected
-    if (_checkParity(_data)) { // parity check, success
-      return true;
-    }
-    else { // parity check failed, error
-      return false;
-    }
-  }
-  else { // no stop bit detected, error
-    return false;
-  }
+bool OpenTherm::sendRequestAync(unsigned long request)
+{
+	//Serial.println("Request: " + String(request, HEX));
+	noInterrupts();
+	const bool ready = isReady();
+	interrupts();
+
+	if (!ready)
+	  return false;
+
+	status = OpenThermStatus::REQUEST_SENDING;
+	response = 0;
+	responseStatus = OpenThermResponseStatus::NONE;
+
+	sendBit(HIGH); //start bit
+	for (int i = 31; i >= 0; i--) {
+		sendBit(bitRead(request, i));
+	}
+	sendBit(HIGH); //stop bit
+	setIdleState();
+
+	status = OpenThermStatus::RESPONSE_WAITING;
+	responseTimestamp = micros();
+	return true;
 }
 
-void OPENTHERM::_writeBit(byte high, byte clock) {
-  if (clock == 1) { // left part of manchester encoding
-    digitalWrite(_pin, !high); // low means logical 1 to protocol
-  }
-  else { // right part of manchester encoding
-    digitalWrite(_pin, high); // high means logical 0 to protocol
-  }
+unsigned long OpenTherm::sendRequest(unsigned long request)
+{
+	if (!sendRequestAync(request)) return 0;
+	while (!isReady()) {
+		process();
+		yield();
+	}
+	return response;
 }
 
-bool OPENTHERM::hasMessage() {
-  return _mode == MODE_RECEIVED;
+bool OpenTherm::sendResponse(unsigned long request)
+{
+	status = OpenThermStatus::REQUEST_SENDING;
+	response = 0;
+	responseStatus = OpenThermResponseStatus::NONE;
+
+	sendBit(HIGH); //start bit
+	for (int i = 31; i >= 0; i--) {
+		sendBit(bitRead(request, i));
+	}
+	sendBit(HIGH); //stop bit
+	setIdleState();
+	status = OpenThermStatus::READY;
+	return true;
 }
 
-bool OPENTHERM::isSent() {
-  return _mode == MODE_SENT;
+unsigned long OpenTherm::getLastResponse()
+{
+	return response;
 }
 
-bool OPENTHERM::isIdle() {
-  return _mode == MODE_IDLE;
+OpenThermResponseStatus OpenTherm::getLastResponseStatus()
+{
+	return responseStatus;
 }
 
-bool OPENTHERM::isError() {
-  return _mode == MODE_ERROR_TOUT;
+void IRAM_ATTR OpenTherm::handleInterrupt()
+{
+	if (isReady())
+	{
+		if (isSlave && readState() == HIGH) {
+		   status = OpenThermStatus::RESPONSE_WAITING;
+		}
+		else {
+			return;
+		}
+	}
+
+	unsigned long newTs = micros();
+	if (status == OpenThermStatus::RESPONSE_WAITING) {
+		if (readState() == HIGH) {
+			status = OpenThermStatus::RESPONSE_START_BIT;
+			responseTimestamp = newTs;
+		}
+		else {
+			status = OpenThermStatus::RESPONSE_INVALID;
+			responseTimestamp = newTs;
+		}
+	}
+	else if (status == OpenThermStatus::RESPONSE_START_BIT) {
+		if ((newTs - responseTimestamp < 750) && readState() == LOW) {
+			status = OpenThermStatus::RESPONSE_RECEIVING;
+			responseTimestamp = newTs;
+			responseBitIndex = 0;
+		}
+		else {
+			status = OpenThermStatus::RESPONSE_INVALID;
+			responseTimestamp = newTs;
+		}
+	}
+	else if (status == OpenThermStatus::RESPONSE_RECEIVING) {
+		if ((newTs - responseTimestamp) > 750) {
+			if (responseBitIndex < 32) {
+				response = (response << 1) | !readState();
+				responseTimestamp = newTs;
+				responseBitIndex++;
+			}
+			else { //stop bit
+				status = OpenThermStatus::RESPONSE_READY;
+				responseTimestamp = newTs;
+			}
+		}
+	}
 }
 
-void OPENTHERM::_callCallback() {
-  if (_callback != NULL) {
-    _callback();
-    _callback = NULL;
-  }
+void OpenTherm::process()
+{
+	noInterrupts();
+	OpenThermStatus st = status;
+	unsigned long ts = responseTimestamp;
+	interrupts();
+
+	if (st == OpenThermStatus::READY) return;
+	unsigned long newTs = micros();
+	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
+		status = OpenThermStatus::READY;
+		responseStatus = OpenThermResponseStatus::TIMEOUT;
+		if (processResponseCallback != NULL) {
+			processResponseCallback(response, responseStatus);
+		}
+	}
+	else if (st == OpenThermStatus::RESPONSE_INVALID) {
+		status = OpenThermStatus::DELAY;
+		responseStatus = OpenThermResponseStatus::INVALID;
+		if (processResponseCallback != NULL) {
+			processResponseCallback(response, responseStatus);
+		}
+	}
+	else if (st == OpenThermStatus::RESPONSE_READY) {
+		status = OpenThermStatus::DELAY;
+		responseStatus = (isSlave ? isValidRequest(response) : isValidResponse(response)) ? OpenThermResponseStatus::SUCCESS : OpenThermResponseStatus::INVALID;
+		if (processResponseCallback != NULL) {
+			processResponseCallback(response, responseStatus);
+		}
+	}
+	else if (st == OpenThermStatus::DELAY) {
+		if ((newTs - ts) > 100000) {
+			status = OpenThermStatus::READY;
+		}
+	}
 }
 
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) // Arduino Uno
-ISR(TIMER2_COMPA_vect) { // Timer2 interrupt
-  OPENTHERM::_timerISR();
+bool OpenTherm::parity(unsigned long frame) //odd parity
+{
+	byte p = 0;
+	while (frame > 0)
+	{
+		if (frame & 1) p++;
+		frame = frame >> 1;
+	}
+	return (p & 1);
 }
 
-// 5 kHz timer
-void OPENTHERM::_startReadTimer() {
-  cli();
-  TCCR2A = 0; // set entire TCCR2A register to 0
-  TCCR2B = 0; // same for TCCR2B
-  TCNT2  = 0; //initialize counter value to 0
-  // set compare match register for 4kHz increments (1/4 of bit period)
-  OCR2A = 99; // = (16*10^6) / (5000*32) - 1 (must be <256)
-  TCCR2A |= (1 << WGM21); // turn on CTC mode
-  TCCR2B |= (1 << CS21) | (1 << CS20); // Set CS21 & CS20 bit for 32 prescaler
-  TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
-  sei();
+OpenThermMessageType OpenTherm::getMessageType(unsigned long message)
+{
+	OpenThermMessageType msg_type = static_cast<OpenThermMessageType>((message >> 28) & 7);
+	return msg_type;
 }
 
-// 2 kHz timer
-void OPENTHERM::_startWriteTimer() {
-  cli();
-  TCCR2A = 0; // set entire TCCR2A register to 0
-  TCCR2B = 0; // same for TCCR2B
-  TCNT2  = 0; //initialize counter value to 0
-  // set compare match register for 2080Hz increments (2kHz to do transition in the middle of the bit)
-  OCR2A = 252;// = (16*10^6) / (2080*32) - 1 (must be <256)
-  TCCR2A |= (1 << WGM21); // turn on CTC mode
-  TCCR2B |= (1 << CS21) | (1 << CS20); // Set CS21 & CS20 bit for 32 prescaler
-  TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
-  sei();
+OpenThermMessageID OpenTherm::getDataID(unsigned long frame)
+{
+	return (OpenThermMessageID)((frame >> 16) & 0xFF);
 }
 
-// 1 kHz timer
-void OPENTHERM::_startTimeoutTimer() {
-  cli();
-  TCCR2A = 0; // set entire TCCR2A register to 0
-  TCCR2B = 0; // same for TCCR2B
-  TCNT2  = 0; //initialize counter value to 0
-  // set compare match register for 1kHz increments
-  OCR2A = 249; // = (16*10^6) / (1000*64) - 1 (must be <256)
-  TCCR2A |= (1 << WGM21); // turn on CTC mode
-  TCCR2B |= (1 << CS22); // Set CS22 bit for 64 prescaler
-  TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
-  sei();
+unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
+{
+	unsigned long request = data;
+	if (type == OpenThermMessageType::WRITE_DATA) {
+		request |= 1ul << 28;
+	}
+	request |= ((unsigned long)id) << 16;
+	if (parity(request)) request |= (1ul << 31);
+	return request;
 }
 
-void OPENTHERM::_stopTimer() {
-  cli();
-  TIMSK2 = 0;
-  sei();
-}
-#endif // END AVR arduino Uno
-
-#if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega16U4__) // Arduino Leonardo
-ISR(TIMER3_COMPA_vect) { // Timer3 interrupt
-  OPENTHERM::_timerISR();
+unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
+{
+	unsigned long response = data;
+	response |= ((unsigned long)type) << 28;
+	response |= ((unsigned long)id) << 16;
+	if (parity(response)) response |= (1ul << 31);
+	return response;
 }
 
-// 5 kHz timer
-void OPENTHERM::_startReadTimer() {
-  cli();
-  TCCR3A = 0; // set entire TCCR3A register to 0
-  TCCR3B = 0; // same for TCCR3B
-  TCNT3  = 0; //initialize counter value to 0
-  // set compare match register for 4kHz increments (1/4 of bit period)
-  OCR3A = 3199; // = (16*10^6) / (5000*1) - 1 (must be <65536)
-  TCCR3B |= (1 << WGM32);  // turn on CTC mode
-  TCCR3B |= (1 << CS30);   // No prescaling
-  TIMSK3 |= (1 << OCIE3A); // enable timer compare interrupt
-  sei();
+bool OpenTherm::isValidResponse(unsigned long response)
+{
+	if (parity(response)) return false;
+	byte msgType = (response << 1) >> 29;
+	return msgType == READ_ACK || msgType == WRITE_ACK;
 }
 
-// 2 kHz timer
-void OPENTHERM::_startWriteTimer() {
-  cli();
-  TCCR3A = 0; // set entire TCCR3A register to 0
-  TCCR3B = 0; // same for TCCR3B
-  TCNT3  = 0; //initialize counter value to 0
-  // set compare match register for 2080Hz increments (2kHz to do transition in the middle of the bit)
-  OCR3A = 7691;// = (16*10^6) / (2080*1) - 1 (must be <65536)
-  TCCR3B |= (1 << WGM32); // turn on CTC mode
-  TCCR3B |= (1 << CS30);   // No prescaling
-  TIMSK3 |= (1 << OCIE3A); // enable timer compare interrupt
-  sei();
+bool OpenTherm::isValidRequest(unsigned long request)
+{
+	if (parity(request)) return false;
+	byte msgType = (request << 1) >> 29;
+	return msgType == READ_DATA || msgType == WRITE_DATA;
 }
 
-// 1 kHz timer
-void OPENTHERM::_startTimeoutTimer() {
-  cli();
-  TCCR3A = 0; // set entire TCCR3A register to 0
-  TCCR3B = 0; // same for TCCR3B
-  TCNT3  = 0; //initialize counter value to 0
-  // set compare match register for 1kHz increments
-  OCR3A = 15999; // = (16*10^6) / (1000*1) - 1 (must be <65536)
-  TCCR3B |= (1 << WGM32); // turn on CTC mode
-  TCCR3B |= (1 << CS30);   // No prescaling
-  TIMSK3 |= (1 << OCIE3A); // enable timer compare interrupt
-  sei();
+void OpenTherm::end() {
+	if (this->handleInterruptCallback != NULL) {
+		detachInterrupt(digitalPinToInterrupt(inPin));
+	}
 }
 
-void OPENTHERM::_stopTimer() {
-  cli();
-  TIMSK3 = 0;
-  sei();
-}
-#endif // END AVR arduino Leonardo
-
-#if defined(__AVR_ATmega4809__) // Arduino Uno Wifi Rev2, Arduino Nano Every
-// timer interrupt
-ISR(TCB0_INT_vect) {
-  OPENTHERM::_timerISR();
-  TCB0.INTFLAGS = TCB_CAPT_bm; // clear interrupt flag
+const char *OpenTherm::statusToString(OpenThermResponseStatus status)
+{
+	switch (status) {
+		case NONE:	return "NONE";
+		case SUCCESS: return "SUCCESS";
+		case INVALID: return "INVALID";
+		case TIMEOUT: return "TIMEOUT";
+		default:	  return "UNKNOWN";
+	}
 }
 
-// 5 kHz timer
-void OPENTHERM::_startReadTimer() {
-  cli();
-  TCB0.CTRLB = TCB_CNTMODE_INT_gc; // use timer compare mode
-  TCB0.CCMP = 3199; // value to compare with (16*10^6) / 5000 - 1
-  TCB0.INTCTRL = TCB_CAPT_bm; // enable the interrupt
-  TCB0.CTRLA = TCB_CLKSEL_CLKDIV1_gc | TCB_ENABLE_bm; // use Timer A as clock, enable timer
-  sei();
+const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
+{
+	switch (message_type) {
+		case READ_DATA:	   return "READ_DATA";
+		case WRITE_DATA:	  return "WRITE_DATA";
+		case INVALID_DATA:	return "INVALID_DATA";
+		case RESERVED:		return "RESERVED";
+		case READ_ACK:		return "READ_ACK";
+		case WRITE_ACK:	   return "WRITE_ACK";
+		case DATA_INVALID:	return "DATA_INVALID";
+		case UNKNOWN_DATA_ID: return "UNKNOWN_DATA_ID";
+		default:			  return "UNKNOWN";
+	}
 }
 
-// 2 kHz timer
-void OPENTHERM::_startWriteTimer() {
-  cli();
-  TCB0.CTRLB = TCB_CNTMODE_INT_gc; // use timer compare mode
-  TCB0.CCMP = 7999; // value to compare with (16*10^6) / 2000 - 1
-  TCB0.INTCTRL = TCB_CAPT_bm; // enable the interrupt
-  TCB0.CTRLA = TCB_CLKSEL_CLKDIV1_gc | TCB_ENABLE_bm; // use Timer A as clock, enable timer
-  sei();
+//building requests
+
+unsigned long OpenTherm::buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2) {
+	unsigned int data = enableCentralHeating | (enableHotWater << 1) | (enableCooling << 2) | (enableOutsideTemperatureCompensation << 3) | (enableCentralHeating2 << 4);
+	data <<= 8;
+	return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Status, data);
 }
 
-// 1 kHz timer
-void OPENTHERM::_startTimeoutTimer() {
-  cli();
-  TCB0.CTRLB = TCB_CNTMODE_INT_gc; // use timer compare mode
-  TCB0.CCMP = 15999; // value to compare with (16*10^6) / 1000 - 1
-  TCB0.INTCTRL = TCB_CAPT_bm; // enable the interrupt
-  TCB0.CTRLA = TCB_CLKSEL_CLKDIV1_gc | TCB_ENABLE_bm; // use Timer A as clock, enable timer
-  sei();
+unsigned long OpenTherm::buildSetBoilerTemperatureRequest(float temperature) {
+	unsigned int data = temperatureToData(temperature);
+	return buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TSet, data);
 }
 
-void OPENTHERM::_stopTimer() {
-  cli();
-  TCB0.CTRLA = 0;
-  sei();
-}
-#endif // END ATMega4809 Arduino Uno Wifi Rev2, Arduino Nano Every
-
-#ifdef ESP8266
-// 5 kHz timer
-void OPENTHERM::_startReadTimer() {
-  noInterrupts();
-  timer1_attachInterrupt(OPENTHERM::_timerISR);
-  timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP); // 5MHz (5 ticks/us - 1677721.4 us max)
-  timer1_write(1000); // 5kHz
-  interrupts();
+unsigned long OpenTherm::buildGetBoilerTemperatureRequest() {
+	return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tboiler, 0);
 }
 
-// 2 kHz timer
-void OPENTHERM::_startWriteTimer() {
-  noInterrupts();
-  timer1_attachInterrupt(OPENTHERM::_timerISR);
-  timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP); // 5MHz (5 ticks/us - 1677721.4 us max)
-  timer1_write(2500); // 2kHz
-  interrupts();
+//parsing responses
+bool OpenTherm::isFault(unsigned long response) {
+	return response & 0x1;
 }
 
-// 1 kHz timer
-void OPENTHERM::_startTimeoutTimer() {
-  noInterrupts();
-  timer1_attachInterrupt(OPENTHERM::_timerISR);
-  timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP); // 5MHz (5 ticks/us - 1677721.4 us max)
-  timer1_write(5000); // 1kHz
-  interrupts();
+bool OpenTherm::isCentralHeatingActive(unsigned long response) {
+	return response & 0x2;
 }
 
-void OPENTHERM::_stopTimer() {
-  noInterrupts();
-  timer1_disable();
-  timer1_detachInterrupt();
-  interrupts();
-}
-#endif // END ESP8266
-
-#ifdef ESP32
-
-static hw_timer_t * timer = NULL;
-
-static void initTimer() {
-  if (timer == NULL) {
-    timer = timerBegin(0, 80, true);
-  }
+bool OpenTherm::isHotWaterActive(unsigned long response) {
+	return response & 0x4;
 }
 
-// 5 kHz timer
-void OPENTHERM::_startReadTimer() {
-  noInterrupts();
-  initTimer();
-  timerAttachInterrupt(timer, OPENTHERM::_timerISR, false);
-  timerAlarmWrite(timer, 200, true);
-  timerAlarmEnable(timer);
-  interrupts();
+bool OpenTherm::isFlameOn(unsigned long response) {
+	return response & 0x8;
 }
 
-// 2 kHz timer
-void OPENTHERM::_startWriteTimer() {
-  noInterrupts();
-  initTimer();
-  timerAttachInterrupt(timer, OPENTHERM::_timerISR, false);
-  timerAlarmWrite(timer, 500, true);
-  timerAlarmEnable(timer);
-  interrupts();
+bool OpenTherm::isCoolingActive(unsigned long response) {
+	return response & 0x10;
 }
 
-// 1 kHz timer
-void OPENTHERM::_startTimeoutTimer() {
-  noInterrupts();
-  initTimer();
-  timerAttachInterrupt(timer, OPENTHERM::_timerISR, false);
-  timerAlarmWrite(timer, 1000, true);
-  timerAlarmEnable(timer);
-  interrupts();
+bool OpenTherm::isDiagnostic(unsigned long response) {
+	return response & 0x40;
 }
 
-void OPENTHERM::_stopTimer() {
-  noInterrupts();
-  initTimer();
-  timerAlarmDisable(timer);
-  timerDetachInterrupt(timer);
-  interrupts();
-}
-#endif  // END ESP32
-
-// https://stackoverflow.com/questions/21617970/how-to-check-if-value-has-even-parity-of-bits-or-odd
-bool OPENTHERM::_checkParity(unsigned long val) {
-  val ^= val >> 16;
-  val ^= val >> 8;
-  val ^= val >> 4;
-  val ^= val >> 2;
-  val ^= val >> 1;
-  return (~val) & 1;
+uint16_t OpenTherm::getUInt(const unsigned long response) const {
+	const uint16_t u88 = response & 0xffff;
+	return u88;
 }
 
-void OPENTHERM::printToSerial(OpenthermData &data) {
-  if (data.type == OT_MSGTYPE_READ_DATA) {
-    Serial.print(F("ReadData"));
-  }
-  else if (data.type == OT_MSGTYPE_READ_ACK) {
-    Serial.print(F("ReadAck"));
-  }
-  else if (data.type == OT_MSGTYPE_WRITE_DATA) {
-    Serial.print(F("WriteData"));
-  }
-  else if (data.type == OT_MSGTYPE_WRITE_ACK) {
-    Serial.print(F("WriteAck"));
-  }
-  else if (data.type == OT_MSGTYPE_INVALID_DATA) {
-    Serial.print(F("InvalidData"));
-  }
-  else if (data.type == OT_MSGTYPE_DATA_INVALID) {
-    Serial.print(F("DataInvalid"));
-  }
-  else if (data.type == OT_MSGTYPE_UNKNOWN_DATAID) {
-    Serial.print(F("UnknownId"));
-  }
-  else {
-    Serial.print(data.type, BIN);
-  }
-  Serial.print(F(" "));
-  Serial.print(data.id);
-  Serial.print(F(" "));
-  Serial.print(data.valueHB, HEX);
-  Serial.print(F(" "));
-  Serial.print(data.valueLB, HEX);
+float OpenTherm::getFloat(const unsigned long response) const {
+	const uint16_t u88 = getUInt(response);
+	const float f = (u88 & 0x8000) ? -(0x10000L - u88) / 256.0f : u88 / 256.0f;
+	return f;
 }
 
-float OpenthermData::f88() {
-  float value = (int8_t) valueHB;
-  return value + (float)valueLB / 256.0;
+unsigned int OpenTherm::temperatureToData(float temperature) {
+	if (temperature < 0) temperature = 0;
+	if (temperature > 100) temperature = 100;
+	unsigned int data = (unsigned int)(temperature * 256);
+	return data;
 }
 
-void OpenthermData::f88(float value) {
-  if (value >= 0) {
-    valueHB = (byte) value;
-    float fraction = (value - valueHB);
-    valueLB = fraction * 256.0;
-  }
-  else {
-    valueHB = (byte)(value - 1);
-    float fraction = (value - valueHB - 1);
-    valueLB = fraction * 256.0;
-  }
+//basic requests
+
+unsigned long OpenTherm::setBoilerStatus(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2) {
+	return sendRequest(buildSetBoilerStatusRequest(enableCentralHeating, enableHotWater, enableCooling, enableOutsideTemperatureCompensation, enableCentralHeating2));
 }
 
-uint16_t OpenthermData::u16() {
-  uint16_t value = valueHB;
-  return (value << 8) | valueLB;
+bool OpenTherm::setBoilerTemperature(float temperature) {
+	unsigned long response = sendRequest(buildSetBoilerTemperatureRequest(temperature));
+	return isValidResponse(response);
 }
 
-void OpenthermData::u16(uint16_t value) {
-  valueLB = value & 0xFF;
-  valueHB = (value >> 8) & 0xFF;
+float OpenTherm::getBoilerTemperature() {
+	unsigned long response = sendRequest(buildGetBoilerTemperatureRequest());
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
-int16_t OpenthermData::s16() {
-  int16_t value = valueHB;
-  return (value << 8) | valueLB;
+float OpenTherm::getReturnTemperature() {
+    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
+    return isValidResponse(response) ? getFloat(response) : 0;
 }
 
-void OpenthermData::s16(int16_t value) {
-  valueLB = value & 0xFF;
-  valueHB = (value >> 8) & 0xFF;
+bool OpenTherm::setDHWSetpoint(float temperature) {
+    unsigned int data = temperatureToData(temperature);
+    unsigned long response = sendRequest(buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TdhwSet, data));
+    return isValidResponse(response);
+}
+    
+float OpenTherm::getDHWTemperature() {
+    unsigned long response = sendRequest(buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tdhw, 0));
+    return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+float OpenTherm::getModulation() {
+    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
+    return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+float OpenTherm::getPressure() {
+    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::CHPressure, 0));
+    return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+unsigned char OpenTherm::getFault() {
+    return ((sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::ASFflags, 0)) >> 8) & 0xff);
 }
