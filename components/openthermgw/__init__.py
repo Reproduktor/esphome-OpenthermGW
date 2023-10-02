@@ -46,7 +46,7 @@ async def to_code(config):
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
 
-    sens = yield sensor.new_sensor("Version")
+    sens = await sensor.new_sensor("Version")
     cg.add(var.set_sensor_version(sens))
 
 
