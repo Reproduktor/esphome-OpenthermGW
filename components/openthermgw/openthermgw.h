@@ -1,6 +1,6 @@
 #include "esphome.h"
 #include "esphome/components/sensor/sensor.h"
-#include "opentherm.h"
+#include <OpenTherm.h>
 
 #ifndef OpenThermGW_h
 #define OpenThermGW_h
