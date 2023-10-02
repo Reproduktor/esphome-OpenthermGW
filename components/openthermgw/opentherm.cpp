@@ -3,7 +3,7 @@ OpenTherm.cpp - OpenTherm Communication Library For Arduino, ESP8266
 Copyright 2018, Ihor Melnyk
 */
 
-#include "OpenTherm.h"
+#include "opentherm.h"
 
 OpenTherm::OpenTherm(int inPin, int outPin, bool isSlave):
 	status(OpenThermStatus::NOT_INITIALIZED),
