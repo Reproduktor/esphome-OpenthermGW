@@ -21,6 +21,7 @@ OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component, cg.esphome_ns.nam
 MULTI_CONF = False
 
 CONF_SENSOR_VERSION = "version"
+CONF_SENSOR_TEMP_BOLIER = "tempboiler"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -32,6 +33,11 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_SENSOR_VERSION): sensor.sensor_schema(
             unit_of_measurement=UNIT_EMPTY,
             accuracy_decimals=0,
+            device_class=DEVICE_CLASS_EMPTY,
+            state_class=STATE_CLASS_MEASUREMENT).extend(),
+        cv.Optional(CONF_SENSOR_TEMP_BOLIER): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            accuracy_decimals=1,
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
     }
@@ -53,10 +59,10 @@ async def to_code(config):
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
 
-    if CONF_SENSOR_VERSION in config:
-        conf = config[CONF_SENSOR_VERSION]
+    if CONF_SENSOR_TEMP_BOLIER in config:
+        conf = config[CONF_SENSOR_TEMP_BOLIER]
         sens = await sensor.new_sensor(conf)
-        cg.add(var.set_sensor_version(sens))
+        cg.add(var.set_sensor_temp_boiler(sens))
 
 
 def opentherm_component_schema():

@@ -59,6 +59,7 @@ namespace openthermgw {
     {
         ESP_LOGD(LOGTOPIC, "update");
         this->sensor_version->publish_state(VERSION);
+        this->sensor_temp_bolier->publish_state(28.3);
     }
 
     void OpenthermGW::loop()
