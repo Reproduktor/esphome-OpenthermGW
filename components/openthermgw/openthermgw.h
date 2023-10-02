@@ -23,7 +23,7 @@ class OpenthermGW: public PollingComponent
     uint8_t slave_in_pin_ = -1;
     uint8_t slave_out_pin_ = -1;
 
-    sensor::TextSensor *sensor_version;
+    text_sensor::TextSensor *sensor_version;
 
     public:
 
