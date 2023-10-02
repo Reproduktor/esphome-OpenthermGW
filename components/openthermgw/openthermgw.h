@@ -19,8 +19,8 @@ class OpenthermGW: public PollingComponent
 
     public:
 
-    static OpenTherm *mOT;
-    static OpenTherm *sOT;
+    OpenTherm *mOT;
+    OpenTherm *sOT;
 
     sensor::Sensor *master_in_pin_sensor = new sensor::Sensor();
     sensor::Sensor *master_out_pin_sensor = new sensor::Sensor();
@@ -36,17 +36,17 @@ class OpenthermGW: public PollingComponent
     {
     }
 
-    static void IRAM_ATTR mHandleInterrupt()
+    void IRAM_ATTR mHandleInterrupt()
     {
         mOT->handleInterrupt();
     }
 
-    static void IRAM_ATTR sHandleInterrupt()
+    void IRAM_ATTR sHandleInterrupt()
     {
         sOT->handleInterrupt();
     }
 
-    static void processRequest(unsigned long request, OpenThermResponseStatus status)
+    void processRequest(unsigned long request, OpenThermResponseStatus status)
     {
         Serial.println("T" + String(request, HEX)); // master/thermostat request
         unsigned long response = mOT->sendRequest(request);
@@ -71,8 +71,8 @@ class OpenthermGW: public PollingComponent
         mOT = new OpenTherm(slave_in_pin_, slave_out_pin_); // master OT is paired with SLAVE pins (thermostat)
         sOT = new OpenTherm(master_in_pin_, master_out_pin_, true);
 
-        mOT->begin(mHandleInterrupt);
-        sOT->begin(sHandleInterrupt, processRequest);
+        mOT->begin(this->mHandleInterrupt);
+        sOT->begin(this->sHandleInterrupt, this->processRequest);
     }
 
     void update() override
