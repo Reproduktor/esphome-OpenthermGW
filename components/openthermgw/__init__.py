@@ -21,7 +21,7 @@ OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component, cg.esphome_ns.nam
 MULTI_CONF = False
 
 CONF_SENSOR_VERSION = "version"
-CONF_SENSOR_TEMP_BOLIER = "tempboiler"
+CONF_SENSOR_TEMP_BOLIER = "temp_boiler"
 
 CONFIG_SCHEMA = cv.Schema(
     {
