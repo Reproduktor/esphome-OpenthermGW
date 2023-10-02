@@ -34,7 +34,7 @@ class OpenthermGW: public PollingComponent
     sensor::Sensor *slave_out_pin_sensor = new sensor::Sensor();
 
     //text_sensor::TextSensor *sensor_version;
-    static sensor::Sensor *sensor_temp_boiler = nullptr;
+    static sensor::Sensor *sensor_temp_boiler;
 
     void set_master_in_pin(uint8_t pin);
     void set_master_out_pin(uint8_t pin);

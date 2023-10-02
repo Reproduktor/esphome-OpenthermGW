@@ -13,6 +13,9 @@ namespace openthermgw {
     
     OpenthermGW::OpenthermGW(): PollingComponent(10000)
     {
+        sensor_temp_boiler = nullptr;
+        mOT = nullptr;
+        sOT = nullptr;
     }
 
     void IRAM_ATTR OpenthermGW::mHandleInterrupt()
