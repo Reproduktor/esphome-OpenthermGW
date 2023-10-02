@@ -59,6 +59,7 @@ namespace openthermgw {
                     if(sensor_temp_boiler != nullptr)
                         sensor_modulationlevel_boiler->publish_state(f);
                 }
+            }
         }
     }
 
