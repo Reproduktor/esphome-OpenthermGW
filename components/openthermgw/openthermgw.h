@@ -1,6 +1,6 @@
 #include "esphome.h"
 #include "esphome/components/sensor/sensor.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
+//#include "esphome/components/binary_sensor/binary_sensor.h"
 
 #include <OpenTherm.h>
 
