@@ -35,12 +35,12 @@ class OpenthermGW: public PollingComponent
     {
     }
 
-    void IRAM_ATTR mHandleInterrupt()
+    static void IRAM_ATTR mHandleInterrupt()
     {
         mOT->handleInterrupt();
     }
 
-    void IRAM_ATTR sHandleInterrupt()
+    static void IRAM_ATTR sHandleInterrupt()
     {
         sOT->handleInterrupt();
     }
