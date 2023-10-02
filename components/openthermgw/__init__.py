@@ -6,6 +6,7 @@ from esphome.components import climate, sensor
 from esphome import pins
 from esphome.const import (
     CONF_ID,
+    UNIT_EMPTY,
 )
 from esphome.core import coroutine_with_priority
 from esphome.cpp_generator import RawExpression
