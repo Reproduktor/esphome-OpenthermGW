@@ -46,6 +46,9 @@ async def to_code(config):
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
 
+    sens = yield sensor.new_sensor("Version")
+    cg.add(var.set_sensor_version(sens))
+
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.

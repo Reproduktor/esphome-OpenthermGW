@@ -58,6 +58,7 @@ namespace openthermgw {
     void OpenthermGW::update()
     {
         ESP_LOGD(LOGTOPIC, "update");
+        this->sensor_version->publish_state(VERSION);
     }
 
     void OpenthermGW::loop()
