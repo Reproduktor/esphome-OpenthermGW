@@ -73,11 +73,11 @@ class OpenthermGW: public PollingComponent
 
 //        mOT->begin(this->mHandleInterrupt);
 //        sOT->begin(this->sHandleInterrupt, this->processRequest);
-        mOT->begin([this](unsigned long response, OpenThermResponseStatus status)
+        mOT->begin([this](void)
             {
                 mOT->handleInterrupt();
             });
-        sOT->begin([this](unsigned long response, OpenThermResponseStatus status)
+        sOT->begin([this](void)
             {
                 sOT->handleInterrupt();
             }, this->processRequest);
