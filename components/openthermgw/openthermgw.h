@@ -36,6 +36,7 @@ class OpenthermGW: public PollingComponent
     //text_sensor::TextSensor *sensor_version;
     static sensor::Sensor *sensor_temp_boiler;
     static sensor::Sensor *sensor_modulationlevel_boiler;
+    static binary_sensor::BinarySensor *sensor_status_slave_flame;
 
     void set_master_in_pin(uint8_t pin);
     void set_master_out_pin(uint8_t pin);
@@ -45,6 +46,7 @@ class OpenthermGW: public PollingComponent
     //void set_sensor_version(text_sensor::TextSensor *s) { sensor_version = s; }
     void set_sensor_temp_boiler(sensor::Sensor *s) { sensor_temp_boiler = s; }
     void set_sensor_modulationlevel_boiler(sensor::Sensor *s) { sensor_modulationlevel_boiler = s; }
+    void set_sensor_status_slave_flame(binary_sensor::BinarySensor *s) { sensor_status_slave_flame = s; }
 
     OpenthermGW();
 

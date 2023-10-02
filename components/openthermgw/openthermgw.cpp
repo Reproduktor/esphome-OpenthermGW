@@ -4,6 +4,7 @@ OpenTherm *esphome::openthermgw::OpenthermGW::mOT;
 OpenTherm *esphome::openthermgw::OpenthermGW::sOT;
 esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_boiler;
 esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_modulationlevel_boiler;
+esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_status_slave_flame;
 
 namespace esphome {
 namespace openthermgw {
@@ -15,9 +16,11 @@ namespace openthermgw {
     
     OpenthermGW::OpenthermGW(): PollingComponent(10000)
     {
-        sensor_temp_boiler = nullptr;
         mOT = nullptr;
         sOT = nullptr;
+        sensor_temp_boiler = nullptr;
+        sensor_modulationlevel_boiler = nullptr;
+        sensor_status_slave_flame = nullptr;
     }
 
     void IRAM_ATTR OpenthermGW::mHandleInterrupt()
@@ -36,11 +39,20 @@ namespace openthermgw {
         unsigned long response = mOT->sendRequest(request);
         if (response)
         {
-            //Serial.println("B" + String(response, HEX)); // slave/boiler response
             sOT->sendResponse(response);
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
             switch(sOT->getDataID(response))
             {
+                case Status:
+                {
+                    ESP_LOGD(LOGTOPIC, "Opentherm response - Status [%x]", response & 0xff);
+
+                    bool b = response & 0x8; // bit 3, Flame On
+                    if(sensor_status_slave_flame != nullptr)
+                        sensor_status_slave_flame->publish_state(b);
+
+                    break;
+                }
                 case Tboiler:
                 {
                     float f = sOT->getFloat(response);
@@ -58,6 +70,8 @@ namespace openthermgw {
         
                     if(sensor_temp_boiler != nullptr)
                         sensor_modulationlevel_boiler->publish_state(f);
+
+                    break;
                 }
             }
         }

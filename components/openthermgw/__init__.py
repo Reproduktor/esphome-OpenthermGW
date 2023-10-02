@@ -2,7 +2,7 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import climate, sensor, text_sensor
+from esphome.components import climate, sensor, binary_sensor
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
@@ -23,6 +23,7 @@ MULTI_CONF = False
 CONF_SENSOR_VERSION = "version"
 CONF_SENSOR_TEMP_BOILER = "temp_boiler"
 CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
+CONF_SENSOR_STATUS_SLAVE_FLAME = "status_slave_flame"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -41,6 +42,8 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_FLAME): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -69,6 +72,11 @@ async def to_code(config):
         conf = config[CONF_SENSOR_MODULATIONLEVEL_BOILER]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_sensor_modulationlevel_boiler(sens))
+
+    if CONF_SENSOR_STATUS_SLAVE_FLAME in config:
+        conf = config[CONF_SENSOR_STATUS_SLAVE_FLAME]
+        sens = await binary_sensor.new_binary_sensor(conf)
+        cg.add(var.set_sensor_status_slave_flame(sens))
 
 
 def opentherm_component_schema():
