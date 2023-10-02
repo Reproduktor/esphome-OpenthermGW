@@ -43,7 +43,7 @@ namespace openthermgw {
             ESP_LOGD(LOGTOPIC, "Opentherm response [response: %d, status %s", response, sOT->statusToString(status));
             switch(sOT->getDataID(response))
             {
-                case Status:
+                case 0:
                 {
                     ESP_LOGD(LOGTOPIC, "Opentherm response - Status [%x]", response & 0xff);
 
