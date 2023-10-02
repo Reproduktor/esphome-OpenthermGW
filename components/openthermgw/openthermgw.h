@@ -22,7 +22,7 @@ class OpenthermGW: public PollingComponent
     uint8_t master_out_pin_ = -1;
     uint8_t slave_in_pin_ = -1;
     uint8_t slave_out_pin_ = -1;
-
+    
     public:
 
     static OpenTherm *mOT;
@@ -34,7 +34,7 @@ class OpenthermGW: public PollingComponent
     sensor::Sensor *slave_out_pin_sensor = new sensor::Sensor();
 
     //text_sensor::TextSensor *sensor_version;
-    sensor::Sensor *sensor_temp_boiler = nullptr;
+    static sensor::Sensor *sensor_temp_boiler = nullptr;
 
     void set_master_in_pin(uint8_t pin);
     void set_master_out_pin(uint8_t pin);
