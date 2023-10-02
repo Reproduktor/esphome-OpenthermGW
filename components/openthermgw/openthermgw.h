@@ -52,6 +52,20 @@ class OpenthermGW: public PollingComponent
     void loop() override;
 };
 
+class Sensor_Version: public PollingComponent, public TextSensor
+{
+    public:
+        Sensor_Version() : PollingComponent(3600000) {}
+
+        void setup() override
+        {
+            publish_state(VERSION);
+        }
+        void update() override
+        {
+            publish_state(VERSION);
+        }
+}
 
 }
 }

@@ -21,6 +21,9 @@ OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component, cg.esphome_ns.nam
 
 
 MULTI_CONF = False
+
+CONF_SENSOR_VERSION = "version"
+
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(OpenThermGW),
@@ -28,8 +31,10 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_MASTER_OUT_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_IN_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_OUT_PIN): pins.internal_gpio_input_pin_number,
+        cv.Optional(CONF_SENSOR_VERSION): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
+
 
 
 @coroutine_with_priority(2.0)
@@ -46,8 +51,10 @@ async def to_code(config):
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
 
-    sens = await sensor.new_sensor("Version")
-    cg.add(var.set_sensor_version(sens))
+    if CONF_SENSOR_VERSION in config:
+        conf = config[CONF_SENSOR_VERSION]
+        sens = await sensor.new_sensor(conf)
+        cg.add(var.set_sensor_version(sens))
 
 
 def opentherm_component_schema():
