@@ -115,7 +115,6 @@ namespace openthermgw {
 
                     break;
                 }
-                case 
             }
         }
     }
