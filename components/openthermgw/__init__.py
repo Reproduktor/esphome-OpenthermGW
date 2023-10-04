@@ -20,10 +20,13 @@ OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 AUTO_LOAD = ['binary_sensor']
 MULTI_CONF = False
 
-CONF_SENSOR_VERSION = "version"
-CONF_SENSOR_TEMP_BOILER = "temp_boiler"
-CONF_SENSOR_TEMP_DHW = "temp_dhw"
-CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
+CONF_SENSOR_VERSION = "gw_version"
+
+CONF_SENSOR_STATUS_MASTER_CHENABLE = "status_master_chenable"
+CONF_SENSOR_STATUS_MASTER_DHWENABLE = "status_master_dhwenable"
+CONF_SENSOR_STATUS_MASTER_COOLINGENABLE = "sensor_status_master_coolingenable"
+CONF_SENSOR_STATUS_MASTER_OTCACTIVE = "sensor_status_master_otcactive"
+CONF_SENSOR_STATUS_MASTER_CH2ENABLE = "sensor_status_master_ch2enable"
 CONF_SENSOR_STATUS_SLAVE_FAULT = "status_slave_fault"
 CONF_SENSOR_STATUS_SLAVE_CHMODE = "status_slave_chmode"
 CONF_SENSOR_STATUS_SLAVE_DHWMODE = "status_slave_dhwmode"
@@ -31,6 +34,9 @@ CONF_SENSOR_STATUS_SLAVE_FLAME = "status_slave_flame"
 CONF_SENSOR_STATUS_SLAVE_COOLING = "status_slave_cooling"
 CONF_SENSOR_STATUS_SLAVE_CH2MODE = "status_slave_ch2mode"
 CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC = "status_slave_diagnostic"
+CONF_SENSOR_TEMP_BOILER = "temp_boiler"
+CONF_SENSOR_TEMP_DHW = "temp_dhw"
+CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -39,6 +45,34 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_MASTER_OUT_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_IN_PIN): pins.internal_gpio_input_pin_number,
         cv.Required(CONF_SLAVE_OUT_PIN): pins.internal_gpio_input_pin_number,
+
+        cv.Optional(CONF_SENSOR_STATUS_MASTER_CHENABLE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_MASTER_DHWENABLE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_MASTER_COOLINGENABLE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_MASTER_OTCACTIVE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_MASTER_CH2ENABLE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+
+
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_FAULT): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_CHMODE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_DHWMODE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_FLAME): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_COOLING): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_CH2MODE): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+        cv.Optional(CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC): binary_sensor.binary_sensor_schema(
+            device_class=DEVICE_CLASS_EMPTY).extend(),
+
         cv.Optional(CONF_SENSOR_TEMP_BOILER): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             accuracy_decimals=1,
@@ -54,20 +88,7 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_FAULT): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_CHMODE): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_DHWMODE): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_FLAME): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_COOLING): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_CH2MODE): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
-        cv.Optional(CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC): binary_sensor.binary_sensor_schema(
-            device_class=DEVICE_CLASS_EMPTY).extend(),
+
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -101,6 +122,31 @@ async def to_code(config):
         conf = config[CONF_SENSOR_MODULATIONLEVEL_BOILER]
         sens = await sensor.new_sensor(conf)
         cg.add(var.set_sensor_modulationlevel_boiler(sens))
+
+    if CONF_SENSOR_STATUS_MASTER_CHENABLE in config:
+        conf = config[CONF_SENSOR_STATUS_MASTER_CHENABLE]
+        sens = await binary_sensor.new_binary_sensor(conf)
+        cg.add(var.set_sensor_status_master_CHenable(sens))
+
+    if CONF_SENSOR_STATUS_MASTER_DHWENABLE in config:
+        conf = config[CONF_SENSOR_STATUS_MASTER_DHWENABLE]
+        sens = await binary_sensor.new_binary_sensor(conf)
+        cg.add(var.set_sensor_status_master_DHWenable(sens))
+
+    if CONF_SENSOR_STATUS_MASTER_COOLINGENABLE in config:
+        conf = config[CONF_SENSOR_STATUS_MASTER_COOLINGENABLE]
+        sens = await binary_sensor.new_binary_sensor(conf)
+        cg.add(var.set_sensor_status_master_coolingenable(sens))
+
+    if CONF_SENSOR_STATUS_MASTER_OTCACTIVE in config:
+        conf = config[CONF_SENSOR_STATUS_MASTER_OTCACTIVE]
+        sens = await binary_sensor.new_binary_sensor(conf)
+        cg.add(var.set_sensor_status_master_OTCactive(sens))
+
+    if CONF_SENSOR_STATUS_MASTER_CH2ENABLE in config:
+        conf = config[CONF_SENSOR_STATUS_MASTER_CH2ENABLE]
+        sens = await binary_sensor.new_binary_sensor(conf)
+        cg.add(var.set_sensor_status_master_CH2enable(sens))
 
     if CONF_SENSOR_STATUS_SLAVE_FAULT in config:
         conf = config[CONF_SENSOR_STATUS_SLAVE_FAULT]
