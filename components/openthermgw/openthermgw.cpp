@@ -61,12 +61,12 @@ namespace openthermgw {
 
     void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
     {
-        ESP_LOGD(LOGTOPIC, "Opentherm request [DataID: %d, Data: %x]", mOT->GetDataID(request), request&0xffff);
+        ESP_LOGD(LOGTOPIC, "Opentherm request [DataID: %d, Data: %x]", mOT->getDataID(request), request&0xffff);
         unsigned long response = mOT->sendRequest(request);
         if (response)
         {
             sOT->sendResponse(response);
-            ESP_LOGD(LOGTOPIC, "Opentherm response [DataID: %d, Data: %x, status %s"], sOT->GetDataID(response), response&0xffff, sOT->statusToString(status));
+            ESP_LOGD(LOGTOPIC, "Opentherm response [DataID: %d, Data: %x, status %s]", sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
             switch(sOT->getDataID(response))
             {
                 case 0:
