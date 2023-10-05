@@ -32,7 +32,9 @@ namespace openthermgw {
         sOT = nullptr;
 
         sensor_temp_boiler                  = nullptr;
+        sensor_temp_dhw                     = nullptr;
         sensor_modulationlevel_boiler       = nullptr;
+
         sensor_status_slave_fault           = nullptr;
         sensor_status_slave_CHmode          = nullptr;
         sensor_status_slave_DHWmode         = nullptr;
@@ -47,6 +49,8 @@ namespace openthermgw {
         sensor_status_master_OTCactive      = nullptr;
         sensor_status_master_CH2enable      = nullptr;
 
+        switch_dhw_pump_override            = nullptr;
+        switch_dhw_pump_override_mode       = nullptr;
     }
 
     void IRAM_ATTR OpenthermGW::mHandleInterrupt()
@@ -61,94 +65,97 @@ namespace openthermgw {
 
     void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
     {
-        ESP_LOGD(LOGTOPIC, "Opentherm request [DataID: %d, Data: %x]", mOT->getDataID(request), request&0xffff);
+        ESP_LOGD(LOGTOPIC, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), mOT->getDataID(request), request&0xffff);
         unsigned long response = mOT->sendRequest(request);
         if (response)
         {
             sOT->sendResponse(response);
-            ESP_LOGD(LOGTOPIC, "Opentherm response [DataID: %d, Data: %x, status %s]", sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
-            switch(sOT->getDataID(response))
+            ESP_LOGD(LOGTOPIC, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
+            if(sOT->getMessageType(response) == READ_ACK)
             {
-                case 0:
+                switch(sOT->getDataID(response))
                 {
-                    ESP_LOGD(LOGTOPIC, "Opentherm response - Status [%x]", response & 0xffff);
+                    case 0:
+                    {
+                        ESP_LOGD(LOGTOPIC, "Opentherm response - Status [%x]", response & 0xffff);
 
-                    bool b;
+                        bool b;
 
-                    // Master status - HB
-                    b = response & 0x0100; // bit 0, CH enable
-                    if(sensor_status_master_CHenable != nullptr)
-                        sensor_status_master_CHenable->publish_state(b);
-                    b = response & 0x0200; // bit 1, DHW enable
-                    if(sensor_status_master_DHWenable != nullptr)
-                        sensor_status_master_DHWenable->publish_state(b);
-                    b = response & 0x0400; // bit 2, Cooling enable
-                    if(sensor_status_master_coolingenable != nullptr)
-                        sensor_status_master_coolingenable->publish_state(b);
-                    b = response & 0x0800; // bit 3, OTC active
-                    if(sensor_status_master_OTCactive != nullptr)
-                        sensor_status_master_OTCactive->publish_state(b);
-                    b = response & 0x1000; // bit 4, CH2 enable
-                    if(sensor_status_master_CH2enable != nullptr)
-                        sensor_status_master_CH2enable->publish_state(b);
+                        // Master status - HB
+                        b = response & 0x0100; // bit 0, CH enable
+                        if(sensor_status_master_CHenable != nullptr)
+                            sensor_status_master_CHenable->publish_state(b);
+                        b = response & 0x0200; // bit 1, DHW enable
+                        if(sensor_status_master_DHWenable != nullptr)
+                            sensor_status_master_DHWenable->publish_state(b);
+                        b = response & 0x0400; // bit 2, Cooling enable
+                        if(sensor_status_master_coolingenable != nullptr)
+                            sensor_status_master_coolingenable->publish_state(b);
+                        b = response & 0x0800; // bit 3, OTC active
+                        if(sensor_status_master_OTCactive != nullptr)
+                            sensor_status_master_OTCactive->publish_state(b);
+                        b = response & 0x1000; // bit 4, CH2 enable
+                        if(sensor_status_master_CH2enable != nullptr)
+                            sensor_status_master_CH2enable->publish_state(b);
 
 
-                    // Slave status - LB
-                    b = response & 0x01; // bit 0, Fault indication
-                    if(sensor_status_slave_fault != nullptr)
-                        sensor_status_slave_fault->publish_state(b);
-                    b = response & 0x02; // bit 1, CH mode
-                    if(sensor_status_slave_CHmode != nullptr)
-                        sensor_status_slave_CHmode->publish_state(b);
-                    b = response & 0x4; // bit 2, DHW mode
-                    if(sensor_status_slave_DHWmode != nullptr)
-                        sensor_status_slave_DHWmode->publish_state(b);
-                    b = response & 0x8; // bit 3, Flame On
-                    if(sensor_status_slave_flame != nullptr)
-                        sensor_status_slave_flame->publish_state(b);
-                    b = response & 0x10; // bit 4, Cooling status
-                    if(sensor_status_slave_cooling != nullptr)
-                        sensor_status_slave_cooling->publish_state(b);
-                    b = response & 0x20; // bit 5, CH2 mode
-                    if(sensor_status_slave_CH2mode != nullptr)
-                        sensor_status_slave_CH2mode->publish_state(b);
-                    b = response & 0x40; // bit 6, Diagnostic indication
-                    if(sensor_status_slave_diagnostic != nullptr)
-                        sensor_status_slave_diagnostic->publish_state(b);
+                        // Slave status - LB
+                        b = response & 0x01; // bit 0, Fault indication
+                        if(sensor_status_slave_fault != nullptr)
+                            sensor_status_slave_fault->publish_state(b);
+                        b = response & 0x02; // bit 1, CH mode
+                        if(sensor_status_slave_CHmode != nullptr)
+                            sensor_status_slave_CHmode->publish_state(b);
+                        b = response & 0x4; // bit 2, DHW mode
+                        if(sensor_status_slave_DHWmode != nullptr)
+                            sensor_status_slave_DHWmode->publish_state(b);
+                        b = response & 0x8; // bit 3, Flame On
+                        if(sensor_status_slave_flame != nullptr)
+                            sensor_status_slave_flame->publish_state(b);
+                        b = response & 0x10; // bit 4, Cooling status
+                        if(sensor_status_slave_cooling != nullptr)
+                            sensor_status_slave_cooling->publish_state(b);
+                        b = response & 0x20; // bit 5, CH2 mode
+                        if(sensor_status_slave_CH2mode != nullptr)
+                            sensor_status_slave_CH2mode->publish_state(b);
+                        b = response & 0x40; // bit 6, Diagnostic indication
+                        if(sensor_status_slave_diagnostic != nullptr)
+                            sensor_status_slave_diagnostic->publish_state(b);
 
-                    break;
+                        break;
+                    }
+                    case Tboiler:
+                    {
+                        float f = sOT->getFloat(response);
+                        ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", f);
+            
+                        if(sensor_temp_boiler != nullptr)
+                            sensor_temp_boiler->publish_state(f);
+
+                        break;
+                    }
+                    case Tdhw:
+                    {
+                        float f = sOT->getFloat(response);
+                        ESP_LOGD(LOGTOPIC, "Opentherm response - Tdhw [%f]", f);
+            
+                        if(sensor_temp_dhw != nullptr)
+                            sensor_temp_dhw->publish_state(f);
+
+                        break;
+                    }
+                    case RelModLevel:
+                    {
+                        float f = sOT->getFloat(response);
+                        ESP_LOGD(LOGTOPIC, "Opentherm response - RelModLevel [%f]", f);
+            
+                        if(sensor_temp_boiler != nullptr)
+                            sensor_modulationlevel_boiler->publish_state(f);
+
+                        break;
+                    }
                 }
-                case Tboiler:
-                {
-                    float f = sOT->getFloat(response);
-                    ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", f);
-        
-                    if(sensor_temp_boiler != nullptr)
-                        sensor_temp_boiler->publish_state(f);
-
-                    break;
-                }
-                case Tdhw:
-                {
-                    float f = sOT->getFloat(response);
-                    ESP_LOGD(LOGTOPIC, "Opentherm response - Tdhw [%f]", f);
-        
-                    if(sensor_temp_dhw != nullptr)
-                        sensor_temp_dhw->publish_state(f);
-
-                    break;
-                }
-                case RelModLevel:
-                {
-                    float f = sOT->getFloat(response);
-                    ESP_LOGD(LOGTOPIC, "Opentherm response - RelModLevel [%f]", f);
-        
-                    if(sensor_temp_boiler != nullptr)
-                        sensor_modulationlevel_boiler->publish_state(f);
-
-                    break;
-                }
-            }
+            }// if READ_ACK
         }
     }
 

@@ -2,11 +2,11 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import climate, sensor, binary_sensor
+from esphome.components import sensor, binary_sensor, switch
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
-from esphome.cpp_generator import RawExpression
+# from esphome.cpp_generator import RawExpression
 
 CONF_MASTER_IN_PIN = "master_in_pin"
 CONF_MASTER_OUT_PIN = "master_out_pin"
@@ -17,7 +17,7 @@ CONF_OPENTHERM_ID = "opentherm_id"
 opentherm_ns = cg.esphome_ns.namespace("openthermgw")
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 
-AUTO_LOAD = ['binary_sensor']
+AUTO_LOAD = ['sensor', 'binary_sensor', 'switch']
 MULTI_CONF = False
 
 CONF_SENSOR_VERSION = "gw_version"
@@ -37,6 +37,9 @@ CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC = "status_slave_diagnostic"
 CONF_SENSOR_TEMP_BOILER = "temp_boiler"
 CONF_SENSOR_TEMP_DHW = "temp_dhw"
 CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
+
+CONF_SWITCH_DHW_PUMP_OVERRIDE = "dhw_pump_override"
+CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE = "dhw_pump_override"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -76,19 +79,25 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_SENSOR_TEMP_BOILER): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             accuracy_decimals=1,
-            device_class=DEVICE_CLASS_EMPTY,
+            device_class=DEVICE_CLASS_TEMPERATURE,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         cv.Optional(CONF_SENSOR_TEMP_DHW): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             accuracy_decimals=1,
-            device_class=DEVICE_CLASS_EMPTY,
+            device_class=DEVICE_CLASS_TEMPERATURE,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         cv.Optional(CONF_SENSOR_MODULATIONLEVEL_BOILER): sensor.sensor_schema(
             unit_of_measurement=UNIT_PERCENT,
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
-
+        
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): switch.switch_schema(
+            default_restore_mode=RESTORE_DEFAULT_OFF,
+            device_class=DEVICE_CLASS_SWITCH).extend(),
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
+            default_restore_mode=RESTORE_DEFAULT_OFF,
+            device_class=DEVICE_CLASS_SWITCH).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -183,6 +192,16 @@ async def to_code(config):
         sens = await binary_sensor.new_binary_sensor(conf)
         cg.add(var.set_sensor_status_slave_diagnostic(sens))
 
+
+    if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
+        conf = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
+        sens = await switch.new_switch(conf)
+        cg.add(var.set_switch_dhw_pump_override(sens))
+
+    if CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE in config:
+        conf = config[CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE]
+        sens = await switch.new_switch(conf)
+        cg.add(var.set_switch_dhw_pump_override_mode(sens))
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.

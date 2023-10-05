@@ -1,6 +1,7 @@
 #include "esphome.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
+#include "esphome/components/switch/switch.h"
 
 #include <OpenTherm.h>
 
@@ -51,6 +52,9 @@ class OpenthermGW: public PollingComponent
     static binary_sensor::BinarySensor *sensor_status_master_OTCactive;
     static binary_sensor::BinarySensor *sensor_status_master_CH2enable;
 
+    static switch_::Switch *switch_dhw_pump_override;
+    static switch_::Switch *switch_dhw_pump_override_mode;
+
     void set_master_in_pin(uint8_t pin);
     void set_master_out_pin(uint8_t pin);
     void set_slave_in_pin(uint8_t pin);
@@ -69,9 +73,11 @@ class OpenthermGW: public PollingComponent
     void set_sensor_status_slave_diagnostic(binary_sensor::BinarySensor *s) { sensor_status_slave_diagnostic        = s; }
     void set_sensor_status_master_CHenable(binary_sensor::BinarySensor *s)  { sensor_status_master_CHenable         = s; }
     void set_sensor_status_master_DHWenable(binary_sensor::BinarySensor *s) { sensor_status_master_DHWenable        = s; }
-    void set_sensor_status_master_coolingenable(binary_sensor::BinarySensor *s) { sensor_status_master_coolingenable        = s; }
+    void set_sensor_status_master_coolingenable(binary_sensor::BinarySensor *s) { sensor_status_master_coolingenable= s; }
     void set_sensor_status_master_OTCactive(binary_sensor::BinarySensor *s) { sensor_status_master_OTCactive        = s; }
     void set_sensor_status_master_CH2enable(binary_sensor::BinarySensor *s) { sensor_status_master_CH2enable        = s; }
+    void set_switch_dhw_pump_override(switch_::Switch *s)                   { switch_dhw_pump_override              = s; }
+    void set_switch_dhw_pump_override_mode(switch_::Switch *s)              { switch_dhw_pump_override_mode         = s; }
 
     OpenthermGW();
 
