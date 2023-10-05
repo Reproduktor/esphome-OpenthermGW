@@ -195,13 +195,13 @@ async def to_code(config):
 
     if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
         conf = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
-        sens = await switch.new_switch(conf)
-        cg.add(var.set_switch_dhw_pump_override(sens))
+        swtch = await switch.new_switch(conf)
+        cg.add(var.set_switch_dhw_pump_override(swtch))
 
     if CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE in config:
         conf = config[CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE]
-        sens = await switch.new_switch(conf)
-        cg.add(var.set_switch_dhw_pump_override_mode(sens))
+        swtch = await switch.new_switch(conf)
+        cg.add(var.set_switch_dhw_pump_override_mode(swtch))
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.
