@@ -39,7 +39,7 @@ CONF_SENSOR_TEMP_DHW = "temp_dhw"
 CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 
 CONF_SWITCH_DHW_PUMP_OVERRIDE = "dhw_pump_override"
-CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE = "dhw_pump_override"
+CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE = "dhw_pump_override_mode"
 
 CONFIG_SCHEMA = cv.Schema(
     {
