@@ -93,10 +93,10 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
         cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): switch.switch_schema(
-            restore_mode="RESTORE_DEFAULT_OFF",
+            default_restore_mode="RESTORE_DEFAULT_OFF",
             device_class=DEVICE_CLASS_SWITCH).extend(),
         cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
-            restore_mode="RESTORE_DEFAULT_OFF",
+            default_restore_mode="RESTORE_DEFAULT_OFF",
             device_class=DEVICE_CLASS_SWITCH).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
