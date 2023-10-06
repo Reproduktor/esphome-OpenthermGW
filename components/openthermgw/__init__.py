@@ -1,6 +1,7 @@
 CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 #from esphome.local_switch import *
+from components.local_switch import LOCAL_SWITCH_SCHEMA
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, binary_sensor #, switch
@@ -93,8 +94,8 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
-        #cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): LOCAL_SWITCH_SCHEMA(
-#        ).extend(),
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): LOCAL_SWITCH_SCHEMA(
+        ).extend(),
 
 #        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
 #            device_class=DEVICE_CLASS_SWITCH).extend(),
