@@ -96,7 +96,7 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
-        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE):  local_switch_ns.local_switch_schema(),
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): local_switch_ns.local_switch_schema(),
 
 #        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
 #            device_class=DEVICE_CLASS_SWITCH).extend(),
