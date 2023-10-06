@@ -92,8 +92,7 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
-        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): switch.switch_schema(
-            device_class=DEVICE_CLASS_SWITCH).extend(),
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): switch.switch_schema().extend(),
 
         cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
             device_class=DEVICE_CLASS_SWITCH).extend(),
@@ -192,15 +191,15 @@ async def to_code(config):
         cg.add(var.set_sensor_status_slave_diagnostic(sens))
 
 
-    #if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
-        #confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
-        #swtch = await switch.new_switch(confsw)
-        #cg.add(var.set_switch_dhw_pump_override(swtch))
-    
     if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
-        vsw = cg.new_Pvariable(config[CONF_ID])
-        await switch.register_switch(vsw, config)
-        cg.add(var.set_switch_dhw_pump_override(vsw))
+        confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
+        swtch = await switch.new_switch(confsw)
+        cg.add(var.set_switch_dhw_pump_override(swtch))
+    
+    # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
+    #     vsw = cg.new_Pvariable(config[CONF_ID])
+    #     await switch.register_switch(vsw, config)
+    #     cg.add(var.set_switch_dhw_pump_override(vsw))
 
 #    if CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE in config:
 #        confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE]
