@@ -12,6 +12,7 @@ class LocalSwitch : public switch_::Switch, public Component
         bool _state = false;
 
     public:
+        void setup() override;
         void write_state(bool state) override;
 };
 
