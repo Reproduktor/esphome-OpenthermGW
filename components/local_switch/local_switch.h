@@ -14,6 +14,7 @@ class LocalSwitch : public switch_::Switch, public Component
     public:
         void setup() override;
         void write_state(bool state) override;
+        bool getState() { return _state; }
 };
 
 } // namespace local_switch

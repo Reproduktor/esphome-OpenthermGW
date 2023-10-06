@@ -1,5 +1,6 @@
 CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
+from components.local_switch.switch import LocalSwitch
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, binary_sensor, switch
@@ -92,10 +93,12 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
-        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): LOCAL_SWITCH_SCHEMA.extend(),
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): LocalSwitch(
 
-        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
-            device_class=DEVICE_CLASS_SWITCH).extend(),
+        ),
+
+#        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
+#            device_class=DEVICE_CLASS_SWITCH).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -193,7 +196,7 @@ async def to_code(config):
 
     if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
         confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
-        swtch = await switch.new_switch(confsw)
+        swtch = await local_switch.new_switch(confsw)
         cg.add(var.set_switch_dhw_pump_override(swtch))
     
     # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
