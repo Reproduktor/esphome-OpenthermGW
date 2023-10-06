@@ -196,7 +196,7 @@ async def to_code(config):
 
     if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
         confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
-        swtch = await local_switch.new_switch(confsw)
+        swtch = await LocalSwitch.new_switch(confsw)
         cg.add(var.set_switch_dhw_pump_override(swtch))
     
     # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
