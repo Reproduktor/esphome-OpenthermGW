@@ -1,7 +1,7 @@
 CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 #from esphome.local_switch import *
-from components.local_switch import LOCAL_SWITCH_SCHEMA
+#from components.local_switch import LOCAL_SWITCH_SCHEMA
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, binary_sensor #, switch
