@@ -197,9 +197,11 @@ async def to_code(config):
         #swtch = await switch.new_switch(confsw)
         #cg.add(var.set_switch_dhw_pump_override(swtch))
     
-    vsw = cg.new_Pvariable(config[CONF_SWITCH_DHW_PUMP_OVERRIDE])
-    await switch.register_switch(vsw, config)
-    cg.add(var.set_switch_dhw_pump_override(vsw))
+    if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
+        vsw = cg.new_Pvariable(config[CONF_SWITCH_DHW_PUMP_OVERRIDE])
+        await switch.register_switch(vsw, config[CONF_SWITCH_DHW_PUMP_OVERRIDE])
+        cg.add(var.set_switch_dhw_pump_override(vsw))
+
 #    if CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE in config:
 #        confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE]
 #        swtch = await switch.new_switch(confsw)
