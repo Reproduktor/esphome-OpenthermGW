@@ -2,7 +2,7 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, binary_sensor, switch, local_switch
+from esphome.components import sensor, binary_sensor, switch
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
