@@ -1,9 +1,9 @@
 CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
-from components.local_switch.switch import *
+# from components.local_switch.switch import *
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, binary_sensor, switch
+from esphome.components import sensor, binary_sensor #, switch
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
@@ -116,6 +116,7 @@ async def to_code(config):
     cg.add(var.set_slave_out_pin(config[CONF_SLAVE_OUT_PIN]))
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
+#    cg.add_library("local_switch")
 
     if CONF_SENSOR_TEMP_BOILER in config:
         conf = config[CONF_SENSOR_TEMP_BOILER]
