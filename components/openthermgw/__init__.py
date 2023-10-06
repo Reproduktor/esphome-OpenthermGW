@@ -1,6 +1,6 @@
 CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
-from local_switch import local_switch_schema
+#from local_switch import local_switch_schema
 #from components.local_switch import LOCAL_SWITCH_SCHEMA
 import esphome.codegen as cg
 import esphome.config_validation as cv
@@ -17,6 +17,8 @@ CONF_SLAVE_OUT_PIN = "slave_out_pin"
 CONF_OPENTHERM_ID = "opentherm_id"
 
 opentherm_ns = cg.esphome_ns.namespace("openthermgw")
+local_switch_ns = cg.esphome_ns.namespace("local_switch")
+
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 
 AUTO_LOAD = ['sensor', 'binary_sensor', 'switch']
@@ -94,8 +96,8 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
-        #cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE):  local_switch_schema(
-        #).extend(),
+        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE):  local_switch_ns.local_switch_schema(
+        ).extend(),
 
 #        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
 #            device_class=DEVICE_CLASS_SWITCH).extend(),
