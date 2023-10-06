@@ -16,7 +16,4 @@ async def to_code(config):
     await switch.register_switch(var, config)
 
 def local_switch_schema():
-    schema = {
-        cv.GenerateID(): cv.declare_id(LocalSwitch),
-    }
-    return cv.Schema(schema)    
+    return LOCAL_SWITCH_SCHEMA
