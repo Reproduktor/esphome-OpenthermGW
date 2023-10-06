@@ -93,7 +93,7 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT).extend(),
         
         cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): switch.switch_schema().extend(
-        {cv.GenerateID(): cv.declare_id(Switch),}),
+        {cv.GenerateID(): cv.declare_id(switch.Switch),}),
 
         cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
             device_class=DEVICE_CLASS_SWITCH).extend(),
