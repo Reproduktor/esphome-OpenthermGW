@@ -4,7 +4,7 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 #from components.local_switch import LOCAL_SWITCH_SCHEMA
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, binary_sensor #, switch
+from esphome.components import sensor, binary_sensor, switch
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
@@ -203,10 +203,10 @@ async def to_code(config):
     #     await switch.register_switch(var, config)
     #     cg.add(var.set_switch_dhw_pump_override(swtch))
     
-    # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
-    #     vsw = cg.new_Pvariable(config[CONF_ID])
-    #     await switch.register_switch(vsw, config)
-    #     cg.add(var.set_switch_dhw_pump_override(vsw))
+    if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
+        vsw = cg.new_Pvariable(config[CONF_ID])
+        await switch.register_switch(vsw, config)
+        cg.add(var.set_switch_dhw_pump_override(vsw))
 
 #    if CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE in config:
 #        confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE]
