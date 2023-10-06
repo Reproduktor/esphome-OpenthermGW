@@ -193,10 +193,12 @@ async def to_code(config):
         sens = await binary_sensor.new_binary_sensor(conf)
         cg.add(var.set_sensor_status_slave_diagnostic(sens))
 
-
     if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
         confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
-        swtch = await LocalSwitch.new_switch(confsw)
+        #swtch = await LocalSwitch.new_switch(confsw)
+        swtch = cg.new_Pvariable(confsw)
+        await cg.register_component(var, config)
+        await switch.register_switch(var, config)
         cg.add(var.set_switch_dhw_pump_override(swtch))
     
     # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
