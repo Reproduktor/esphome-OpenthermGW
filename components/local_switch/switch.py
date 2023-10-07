@@ -15,5 +15,5 @@ async def to_code(config):
     await cg.register_component(var, config)
     await switch.register_switch(var, config)
 
-def local_switch_schema() -> cv.Schema:
-    return CONFIG_SCHEMA
+#def local_switch_schema() -> cv.Schema:
+#    return CONFIG_SCHEMA
