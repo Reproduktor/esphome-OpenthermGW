@@ -1,14 +1,11 @@
 CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
-#from ..local_switch import local_switch_schema
-#from components.local_switch import LOCAL_SWITCH_SCHEMA
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, binary_sensor, switch
+from esphome.components import sensor, binary_sensor
 from esphome import pins
 from esphome.const import *
 from esphome.core import coroutine_with_priority
-# from esphome.cpp_generator import RawExpression
 
 CONF_MASTER_IN_PIN = "master_in_pin"
 CONF_MASTER_OUT_PIN = "master_out_pin"
@@ -41,9 +38,6 @@ CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC = "status_slave_diagnostic"
 CONF_SENSOR_TEMP_BOILER = "temp_boiler"
 CONF_SENSOR_TEMP_DHW = "temp_dhw"
 CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
-
-CONF_SWITCH_DHW_PUMP_OVERRIDE = "dhw_pump_override"
-CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE = "dhw_pump_override_mode"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -95,14 +89,6 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
-        
-        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): local_switch_ns.local_switch_schema(
-            device_class=DEVICE_CLASS_SWITCH).extend(),
-
-        #cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE): local_switch_ns.local_switch_schema().extend(),
-
-#        cv.Optional(CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE): switch.switch_schema(
-#            device_class=DEVICE_CLASS_SWITCH).extend(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -121,7 +107,6 @@ async def to_code(config):
     cg.add(var.set_slave_out_pin(config[CONF_SLAVE_OUT_PIN]))
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
-#    cg.add_library("local_switch")
 
     if CONF_SENSOR_TEMP_BOILER in config:
         conf = config[CONF_SENSOR_TEMP_BOILER]
@@ -197,23 +182,6 @@ async def to_code(config):
         conf = config[CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC]
         sens = await binary_sensor.new_binary_sensor(conf)
         cg.add(var.set_sensor_status_slave_diagnostic(sens))
-
-    # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
-    #     confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE]
-    #     swtch = cg.new_Pvariable(confsw)
-    #     await cg.register_component(var, config)
-    #     await switch.register_switch(var, config)
-    #     cg.add(var.set_switch_dhw_pump_override(swtch))
-    
-    # if CONF_SWITCH_DHW_PUMP_OVERRIDE in config:
-    #     vsw = cg.new_Pvariable(config[CONF_SWITCH_DHW_PUMP_OVERRIDE][CONF_ID])
-    #     await switch.register_switch(vsw, config)
-    #     cg.add(var.set_switch_dhw_pump_override(vsw))
-
-#    if CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE in config:
-#        confsw = config[CONF_SWITCH_DHW_PUMP_OVERRIDE_MODE]
-#        swtch = await switch.new_switch(confsw)
-#        cg.add(var.set_switch_dhw_pump_override_mode(swtch))
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.
