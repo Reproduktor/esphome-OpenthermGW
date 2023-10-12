@@ -161,6 +161,11 @@ namespace openthermgw {
         }
     }
 
+    void OpenthermGW::add_sensor_acme(sensor::Sensor *s, int messageid)
+    {
+        acme_sensor_list[num_acme_sensors++] = s;
+    }
+
     void OpenthermGW::setup()
     {
         // This will be called once to set up the component

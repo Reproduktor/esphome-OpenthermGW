@@ -99,7 +99,7 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT).extend(),
 
         cv.Optional(CONF_SENSOR_ACME_OT_LIST): cv.All(
-            cv.ensure_list(CONF_SCHEMA_ACME_OT), cv.Length(min=1, max=2)
+            cv.ensure_list(CONF_SCHEMA_ACME_OT), cv.Length(min=1, max=200)
             ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
@@ -119,6 +119,13 @@ async def to_code(config):
     cg.add(var.set_slave_out_pin(config[CONF_SLAVE_OUT_PIN]))
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")
+
+    if CONF_SENSOR_ACME_OT_LIST in config:
+        for messagesensor in config[CONF_SENSOR_ACME_OT_LIST]:
+            sens = await sensor.new_sensor(messagesensor[CONF_SENSOR])
+            cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR], CONF_SENSOR_ACME_OT_MESSAGE_ID))
+
+    
 
     if CONF_SENSOR_TEMP_BOILER in config:
         conf = config[CONF_SENSOR_TEMP_BOILER]
