@@ -167,7 +167,7 @@ namespace openthermgw {
         if(num_acme_sensors == 2)
         {
             s->set_unit_of_measurement("°C");
-            s->set_device_class(DEVICE_CLASS_TEMPERATURE);
+            s->set_device_class("temperature");
         }
     }
 
