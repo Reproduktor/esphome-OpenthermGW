@@ -164,6 +164,11 @@ namespace openthermgw {
     void OpenthermGW::add_sensor_acme(sensor::Sensor *s, int messageid)
     {
         acme_sensor_list[num_acme_sensors++] = s;
+        if(num_acme_sensors == 2)
+        {
+            s->set_unit_of_measurement("°C");
+            s->set_device_class(DEVICE_CLASS_TEMPERATURE);
+        }
     }
 
     void OpenthermGW::setup()
