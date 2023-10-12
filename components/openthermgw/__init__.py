@@ -41,7 +41,7 @@ CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 
 CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
 CONF_SENSOR_ACME_OT_MESSAGE_ID = "message_id"
-CONF_SCHEMA_ACME_OT = cv.SENSOR_SCHEMA.extend(
+CONF_SCHEMA_ACME_OT = sensor.sensor_schema().extend(
     {
         cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.uint16_t,
     }
