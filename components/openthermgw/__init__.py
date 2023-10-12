@@ -39,6 +39,14 @@ CONF_SENSOR_TEMP_BOILER = "temp_boiler"
 CONF_SENSOR_TEMP_DHW = "temp_dhw"
 CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 
+CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
+CONF_SENSOR_ACME_OT_MESSAGE_ID = "message_id"
+CONF_SCHEMA_ACME_OT = cv.SENSOR_SCHEMA.extend(
+    {
+        cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.uint16_t,
+    }
+    )
+
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(OpenThermGW),
@@ -89,6 +97,10 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_EMPTY,
             state_class=STATE_CLASS_MEASUREMENT).extend(),
+
+        cv.Optional(CONF_SENSOR_ACME_OT_LIST): cv.All(
+            cv.ensure_list(), cv.Length(min=1, max=200)
+            ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
