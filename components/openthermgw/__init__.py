@@ -122,8 +122,8 @@ async def to_code(config):
 
     if CONF_SENSOR_ACME_OT_LIST in config:
         for messagesensor in config[CONF_SENSOR_ACME_OT_LIST]:
-            sens = await sensor.new_sensor(messagesensor[CONF_SENSOR])
-            cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR], CONF_SENSOR_ACME_OT_MESSAGE_ID))
+            sens = await sensor.new_sensor(messagesensor)
+            cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID]))
 
     
 
