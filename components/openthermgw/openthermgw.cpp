@@ -175,7 +175,7 @@ namespace openthermgw {
             pSensorList = new std::vector<AcmeSensorInfo *>();
             acme_sensor_map[pAcmeSensorInfo->messageID] = pSensorList;
         }
-        pSensorList->insert(pAcmeSensorInfo);
+        pSensorList->push_back(pAcmeSensorInfo);
     }
 
     void OpenthermGW::setup()
