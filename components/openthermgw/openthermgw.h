@@ -5,6 +5,9 @@
 
 #include <OpenTherm.h>
 
+#include <map>
+#include <vector>
+
 #ifndef OpenThermGW_h
 #define OpenThermGW_h
 
@@ -25,7 +28,15 @@ class OpenthermGW: public PollingComponent
     uint8_t slave_in_pin_ = -1;
     uint8_t slave_out_pin_ = -1;
     
-    sensor::Sensor *acme_sensor_list[200];
+    struct AcmeSensorInfo
+    {
+        int messageID;
+        bool valueOnRequest;
+        int valueType;
+        sensor::Sensor *acmeSensor;
+    };
+
+    std::map<int, std::vector<AcmeSensor *> *> acme_sensor_map;
     int num_acme_sensors = 0;
 
     public:
@@ -81,7 +92,7 @@ class OpenthermGW: public PollingComponent
     void set_sensor_status_master_CH2enable(binary_sensor::BinarySensor *s) { sensor_status_master_CH2enable        = s; }
     void set_switch_dhw_pump_override(switch_::Switch *s)                   { switch_dhw_pump_override              = s; }
     void set_switch_dhw_pump_override_mode(switch_::Switch *s)              { switch_dhw_pump_override_mode         = s; }
-    void add_sensor_acme(sensor::Sensor *s, int messageid);
+    void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
 
     OpenthermGW();
 

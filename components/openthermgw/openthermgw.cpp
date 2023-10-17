@@ -161,14 +161,21 @@ namespace openthermgw {
         }
     }
 
-    void OpenthermGW::add_sensor_acme(sensor::Sensor *s, int messageid)
+    void OpenthermGW::add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype)
     {
-        acme_sensor_list[num_acme_sensors++] = s;
-        if(num_acme_sensors == 2)
+        AcmeSensorInfo *pAcmeSensorInfo = new AcmeSensorInfo();
+        pAcmeSensorInfo->messageID = messageid;
+        pAcmeSensorInfo->valueOnRequest = valueonrequest;
+        pAcmeSensorInfo->valueType = valuetype;
+        pAcmeSensorInfo->acmeSensor = s;
+
+        std::vector<AcmeSensor *> *pSensorList = acme_sensor_map[pAcmeSensorInfo->messageID];
+        if(pSensorList == nullptr)
         {
-            s->set_unit_of_measurement("°C");
-            s->set_device_class("temperature");
+            pSensorList = new std::vector<AcmeSensor *>();
+            acme_sensor_map[pAcmeSensorInfo->messageID] = pSensorList;
         }
+        pSensorList->insert(pAcmeSensorInfo);
     }
 
     void OpenthermGW::setup()

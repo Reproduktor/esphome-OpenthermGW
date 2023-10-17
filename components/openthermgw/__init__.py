@@ -41,9 +41,14 @@ CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 
 CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
 CONF_SENSOR_ACME_OT_MESSAGE_ID = "message_id"
+CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST = "value_on_request"
+CONF_SENSOR_ACME_OT_VALUE_TYPE = "value_type"
+CONF_SENSOR_ACME_OT_CREATE_REQUEST_MESSAGE_TYPE_SENSOR = "create_request_sensor"
 CONF_SCHEMA_ACME_OT = sensor.sensor_schema().extend(
     {
-        cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.uint16_t,
+        cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
+        cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default=cv.false): cv.boolean,
+        cv.Optional(CONF_SENSOR_ACME_OT_VALUE_TYPE, default=0): cv.int_range(0, 6), # 0=u16, 1=s16, 2=f16, 3=u8LB, 4=u8HB, 5=s8LB, 6=s8HB, 7=RESPONSE
     }
     )
 
@@ -123,9 +128,7 @@ async def to_code(config):
     if CONF_SENSOR_ACME_OT_LIST in config:
         for messagesensor in config[CONF_SENSOR_ACME_OT_LIST]:
             sens = await sensor.new_sensor(messagesensor)
-            cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID]))
-
-    
+            cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_VALUE_TYPE]))
 
     if CONF_SENSOR_TEMP_BOILER in config:
         conf = config[CONF_SENSOR_TEMP_BOILER]
