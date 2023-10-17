@@ -261,9 +261,7 @@ namespace openthermgw {
 
     void OpenthermGW::update()
     {
-        ESP_LOGD(LOGTOPIC, "update");
-        ESP_LOGD(LOGTOPIC, "acme sensors %d", num_acme_sensors);
-
+        ESP_LOGD(LOGTOPIC, "acme messages handdled: %d", acme_sensor_map.size());
     }
 
     void OpenthermGW::loop()
