@@ -49,9 +49,6 @@ class OpenthermGW: public PollingComponent
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
 
     //text_sensor::TextSensor *sensor_version;
-    static sensor::Sensor *sensor_temp_boiler;
-    static sensor::Sensor *sensor_temp_dhw;
-    static sensor::Sensor *sensor_modulationlevel_boiler;
     static binary_sensor::BinarySensor *sensor_status_slave_fault;
     static binary_sensor::BinarySensor *sensor_status_slave_CHmode;
     static binary_sensor::BinarySensor *sensor_status_slave_DHWmode;
@@ -74,9 +71,6 @@ class OpenthermGW: public PollingComponent
     void set_slave_out_pin(uint8_t pin);
     
     //void set_sensor_version(text_sensor::TextSensor *s) { sensor_version = s; }
-    void set_sensor_temp_boiler(sensor::Sensor *s)                          { sensor_temp_boiler = s; }
-    void set_sensor_temp_dhw(sensor::Sensor *s)                             { sensor_temp_dhw = s; }
-    void set_sensor_modulationlevel_boiler(sensor::Sensor *s)               { sensor_modulationlevel_boiler         = s; }
     void set_sensor_status_slave_fault(binary_sensor::BinarySensor *s)      { sensor_status_slave_fault             = s; }
     void set_sensor_status_slave_CHmode(binary_sensor::BinarySensor *s)     { sensor_status_slave_CHmode            = s; }
     void set_sensor_status_slave_DHWmode(binary_sensor::BinarySensor *s)    { sensor_status_slave_DHWmode           = s; }

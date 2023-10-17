@@ -14,9 +14,6 @@ esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_
 esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_status_slave_cooling;
 esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_status_slave_CH2mode;
 esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_status_slave_diagnostic;
-esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_boiler;
-esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_dhw;
-esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_modulationlevel_boiler;
 esphome::switch_::Switch *esphome::openthermgw::OpenthermGW::switch_dhw_pump_override;
 esphome::switch_::Switch *esphome::openthermgw::OpenthermGW::switch_dhw_pump_override_mode;
 std::map<int, std::vector<esphome::openthermgw::OpenthermGW::AcmeSensorInfo *> *> esphome::openthermgw::OpenthermGW::acme_sensor_map;
@@ -33,10 +30,6 @@ namespace openthermgw {
     {
         mOT = nullptr;
         sOT = nullptr;
-
-        sensor_temp_boiler                  = nullptr;
-        sensor_temp_dhw                     = nullptr;
-        sensor_modulationlevel_boiler       = nullptr;
 
         sensor_status_slave_fault           = nullptr;
         sensor_status_slave_CHmode          = nullptr;
@@ -74,68 +67,69 @@ namespace openthermgw {
         {
             sOT->sendResponse(response);
             ESP_LOGD(LOGTOPIC, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
+
+            // acme
+            std::vector<AcmeSensorInfo *> *pSensorList = acme_sensor_map[sOT->getDataID(response)];
+            if(pSensorList != nullptr)
+            {
+                for(AcmeSensorInfo *pSensorInfo: *pSensorList)
+                {
+                    switch(pSensorInfo->valueType)
+                    {
+                        case 0: // u16
+                        {
+                            unsigned short value = sOT->getUInt(response);
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 1: // s16
+                        {
+                            short value = response & 0xffff;
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 2: // f16
+                        {
+                            float value = sOT->getFloat(response);
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 3: // u8LB
+                        {
+                            unsigned char value = response & 0x00ff;
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 4: // u8HB
+                        {
+                            unsigned char value = (response & 0xff00) >> 8;
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 5: // s8LB
+                        {
+                            signed char value = response & 0x00ff;
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 6: // s8HB
+                        {
+                            signed char value = (response & 0xff00) >> 8;
+                            pSensorInfo->acmeSensor->publish_state(value);
+                            break;
+                        }
+                        case 7: // RESPONSE
+                        {
+                            pSensorInfo->acmeSensor->publish_state((response >> 28) & 7);
+                            break;
+                        }
+                    }
+
+                }
+            }
+
             if(sOT->getMessageType(response) == READ_ACK)
             {
-                // acme
-                std::vector<AcmeSensorInfo *> *pSensorList = acme_sensor_map[sOT->getDataID(response)];
-                if(pSensorList != nullptr)
-                {
-                    for(AcmeSensorInfo *pSensorInfo: *pSensorList)
-                    {
-                        switch(pSensorInfo->valueType)
-                        {
-                            case 0: // u16
-                            {
-                                unsigned short value = sOT->getUInt(response);
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 1: // s16
-                            {
-                                short value = response & 0xffff;
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 2: // f16
-                            {
-                                float value = sOT->getFloat(response);
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 3: // u8LB
-                            {
-                                unsigned char value = response & 0x00ff;
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 4: // u8HB
-                            {
-                                unsigned char value = (response & 0xff00) >> 8;
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 5: // s8LB
-                            {
-                                signed char value = response & 0x00ff;
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 6: // s8HB
-                            {
-                                signed char value = (response & 0xff00) >> 8;
-                                pSensorInfo->acmeSensor->publish_state(value);
-                                break;
-                            }
-                            case 7: // RESPONSE
-                            {
-                                pSensorInfo->acmeSensor->publish_state((response >> 28) & 7);
-                                break;
-                            }
-                        }
-
-                    }
-                }
-
 
                 // hardocded
                 switch(sOT->getDataID(response))
@@ -186,36 +180,6 @@ namespace openthermgw {
                         b = response & 0x40; // bit 6, Diagnostic indication
                         if(sensor_status_slave_diagnostic != nullptr)
                             sensor_status_slave_diagnostic->publish_state(b);
-
-                        break;
-                    }
-                    case Tboiler:
-                    {
-                        float f = sOT->getFloat(response);
-                        ESP_LOGD(LOGTOPIC, "Opentherm response - Tboiler [%f]", f);
-            
-                        if(sensor_temp_boiler != nullptr)
-                            sensor_temp_boiler->publish_state(f);
-
-                        break;
-                    }
-                    case Tdhw:
-                    {
-                        float f = sOT->getFloat(response);
-                        ESP_LOGD(LOGTOPIC, "Opentherm response - Tdhw [%f]", f);
-            
-                        if(sensor_temp_dhw != nullptr)
-                            sensor_temp_dhw->publish_state(f);
-
-                        break;
-                    }
-                    case RelModLevel:
-                    {
-                        float f = sOT->getFloat(response);
-                        ESP_LOGD(LOGTOPIC, "Opentherm response - RelModLevel [%f]", f);
-            
-                        if(sensor_temp_boiler != nullptr)
-                            sensor_modulationlevel_boiler->publish_state(f);
 
                         break;
                     }

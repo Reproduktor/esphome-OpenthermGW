@@ -35,9 +35,6 @@ CONF_SENSOR_STATUS_SLAVE_FLAME = "status_slave_flame"
 CONF_SENSOR_STATUS_SLAVE_COOLING = "status_slave_cooling"
 CONF_SENSOR_STATUS_SLAVE_CH2MODE = "status_slave_ch2mode"
 CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC = "status_slave_diagnostic"
-CONF_SENSOR_TEMP_BOILER = "temp_boiler"
-CONF_SENSOR_TEMP_DHW = "temp_dhw"
-CONF_SENSOR_MODULATIONLEVEL_BOILER = "modulationlevel_boiler"
 
 CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
 CONF_SENSOR_ACME_OT_MESSAGE_ID = "message_id"
@@ -87,22 +84,6 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_SENSOR_STATUS_SLAVE_DIAGNOSTIC): binary_sensor.binary_sensor_schema(
             device_class=DEVICE_CLASS_EMPTY).extend(),
 
-        cv.Optional(CONF_SENSOR_TEMP_BOILER): sensor.sensor_schema(
-            unit_of_measurement=UNIT_CELSIUS,
-            accuracy_decimals=1,
-            device_class=DEVICE_CLASS_TEMPERATURE,
-            state_class=STATE_CLASS_MEASUREMENT).extend(),
-        cv.Optional(CONF_SENSOR_TEMP_DHW): sensor.sensor_schema(
-            unit_of_measurement=UNIT_CELSIUS,
-            accuracy_decimals=1,
-            device_class=DEVICE_CLASS_TEMPERATURE,
-            state_class=STATE_CLASS_MEASUREMENT).extend(),
-        cv.Optional(CONF_SENSOR_MODULATIONLEVEL_BOILER): sensor.sensor_schema(
-            unit_of_measurement=UNIT_PERCENT,
-            accuracy_decimals=0,
-            device_class=DEVICE_CLASS_EMPTY,
-            state_class=STATE_CLASS_MEASUREMENT).extend(),
-
         cv.Optional(CONF_SENSOR_ACME_OT_LIST): cv.All(
             cv.ensure_list(CONF_SCHEMA_ACME_OT), cv.Length(min=1, max=200)
             ),
@@ -129,21 +110,6 @@ async def to_code(config):
         for messagesensor in config[CONF_SENSOR_ACME_OT_LIST]:
             sens = await sensor.new_sensor(messagesensor)
             cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_VALUE_TYPE]))
-
-    if CONF_SENSOR_TEMP_BOILER in config:
-        conf = config[CONF_SENSOR_TEMP_BOILER]
-        sens = await sensor.new_sensor(conf)
-        cg.add(var.set_sensor_temp_boiler(sens))
-
-    if CONF_SENSOR_TEMP_DHW in config:
-        conf = config[CONF_SENSOR_TEMP_DHW]
-        sens = await sensor.new_sensor(conf)
-        cg.add(var.set_sensor_temp_dhw(sens))
-
-    if CONF_SENSOR_MODULATIONLEVEL_BOILER in config:
-        conf = config[CONF_SENSOR_MODULATIONLEVEL_BOILER]
-        sens = await sensor.new_sensor(conf)
-        cg.add(var.set_sensor_modulationlevel_boiler(sens))
 
     if CONF_SENSOR_STATUS_MASTER_CHENABLE in config:
         conf = config[CONF_SENSOR_STATUS_MASTER_CHENABLE]
