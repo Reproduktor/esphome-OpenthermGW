@@ -36,7 +36,7 @@ class OpenthermGW: public PollingComponent
         sensor::Sensor *acmeSensor;
     };
 
-    std::map<int, std::vector<AcmeSensor *> *> acme_sensor_map;
+    std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
     int num_acme_sensors = 0;
 
     public:
