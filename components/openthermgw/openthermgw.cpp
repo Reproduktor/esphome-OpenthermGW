@@ -19,6 +19,7 @@ esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_temp_dhw;
 esphome::sensor::Sensor *esphome::openthermgw::OpenthermGW::sensor_modulationlevel_boiler;
 esphome::switch_::Switch *esphome::openthermgw::OpenthermGW::switch_dhw_pump_override;
 esphome::switch_::Switch *esphome::openthermgw::OpenthermGW::switch_dhw_pump_override_mode;
+std::map<int, std::vector<esphome::openthermgw::OpenthermGW::AcmeSensorInfo *> *> acme_sensor_map;
 
 namespace esphome {
 namespace openthermgw {
