@@ -80,7 +80,7 @@ namespace openthermgw {
                 std::vector<AcmeSensorInfo *> *pSensorList = acme_sensor_map[sOT->getDataID(response)];
                 if(pSensorList != nullptr)
                 {
-                    for(AcmeSensorInfo *pSensorInfo: pSensorList)
+                    for(AcmeSensorInfo *pSensorInfo: *pSensorList)
                     {
                         switch(pSensorInfo->valueType)
                         {
