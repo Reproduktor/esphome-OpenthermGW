@@ -128,7 +128,7 @@ namespace openthermgw {
                             }
                             case 7: // RESPONSE
                             {
-                                pSensorInfo->acmeSensor->publish_state((message >> 28) & 7);
+                                pSensorInfo->acmeSensor->publish_state((response >> 28) & 7);
                                 break;
                             }
                         }
