@@ -75,6 +75,68 @@ namespace openthermgw {
             ESP_LOGD(LOGTOPIC, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
             if(sOT->getMessageType(response) == READ_ACK)
             {
+                // acme
+                std::vector<AcmeSensorInfo *> *pSensorList = acme_sensor_map[sOT->getDataID(response)];
+                if(pSensorList != nullptr)
+                {
+                    for(AcmeSensorInfo *pSensorInfo: pSensorList)
+                    {
+                        switch(pSensorInfo->valueType)
+                        {
+                            case 0: // u16
+                            {
+                                unsigned short value = sOT->getUInt(response);
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 1: // s16
+                            {
+                                short value = response & 0xffff;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 2: // f16
+                            {
+                                float value = sOT->getFloat(response);
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 3: // u8LB
+                            {
+                                unsigned char value = response & 0x00ff;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 4: // u8HB
+                            {
+                                unsigned char value = (response & 0xff00) >> 8;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 5: // s8LB
+                            {
+                                signed char value = response & 0x00ff;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 6: // s8HB
+                            {
+                                signed char value = (response & 0xff00) >> 8;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 7: // RESPONSE
+                            {
+                                pSensorInfo->acmeSensor->publish_state((message >> 28) & 7);
+                                break;
+                            }
+                        }
+
+                    }
+                }
+
+
+                // hardocded
                 switch(sOT->getDataID(response))
                 {
                     case 0:
