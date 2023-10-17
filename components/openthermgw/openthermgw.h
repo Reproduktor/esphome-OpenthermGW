@@ -28,17 +28,6 @@ class OpenthermGW: public PollingComponent
     uint8_t slave_in_pin_ = -1;
     uint8_t slave_out_pin_ = -1;
     
-    struct AcmeSensorInfo
-    {
-        int messageID;
-        bool valueOnRequest;
-        int valueType;
-        sensor::Sensor *acmeSensor;
-    };
-
-    static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
-    int num_acme_sensors = 0;
-
     public:
 
     static OpenTherm *mOT;
@@ -48,6 +37,16 @@ class OpenthermGW: public PollingComponent
     sensor::Sensor *master_out_pin_sensor = new sensor::Sensor();
     sensor::Sensor *slave_in_pin_sensor = new sensor::Sensor();
     sensor::Sensor *slave_out_pin_sensor = new sensor::Sensor();
+
+    struct AcmeSensorInfo
+    {
+        int messageID;
+        bool valueOnRequest;
+        int valueType;
+        sensor::Sensor *acmeSensor;
+    };
+
+    static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
 
     //text_sensor::TextSensor *sensor_version;
     static sensor::Sensor *sensor_temp_boiler;
