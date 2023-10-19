@@ -40,14 +40,24 @@ CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
 CONF_SENSOR_ACME_OT_MESSAGE_ID = "message_id"
 CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST = "value_on_request"
 CONF_SENSOR_ACME_OT_VALUE_TYPE = "value_type"
-CONF_SENSOR_ACME_OT_CREATE_REQUEST_MESSAGE_TYPE_SENSOR = "create_request_sensor"
 CONF_SCHEMA_ACME_OT = sensor.sensor_schema().extend(
     {
         cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
         cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
-        cv.Optional(CONF_SENSOR_ACME_OT_VALUE_TYPE, default=0): cv.int_range(0, 7), # 0=u16, 1=s16, 2=f16, 3=u8LB, 4=u8HB, 5=s8LB, 6=s8HB, 7=RESPONSE
+        cv.Optional(CONF_SENSOR_ACME_OT_VALUE_TYPE, default=0): cv.int_range(0, 7), # 0=u16, 1=s16, 2=f16, 3=u8LB, 4=u8HB, 5=s8LB, 6=s8HB, 7=REQUEST/RESPONSE
     }
     )
+
+CONF_SENSOR_ACME_OT_BINARY_LIST = "acme_opentherm_binary_sensors"
+CONF_SENSOR_ACME_OT_BINARY_BIT = "bit"
+CONF_SCHEMA_ACME_OT_BINARY = sensor.sensor_schema().extend(
+    {
+        cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
+        cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
+        cv.Required(CONF_SENSOR_ACME_OT_BINARY_BIT): cv.int_range(1, 16), #1-16 bit index
+    }
+    )
+
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -87,6 +97,9 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_SENSOR_ACME_OT_LIST): cv.All(
             cv.ensure_list(CONF_SCHEMA_ACME_OT), cv.Length(min=1, max=200)
             ),
+        cv.Optional(CONF_SENSOR_ACME_OT_BINARY_LIST): cv.All(
+            cv.ensure_list(CONF_SCHEMA_ACME_OT_BINARY), cv.Length(min=1, max=200)
+            ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -110,6 +123,11 @@ async def to_code(config):
         for messagesensor in config[CONF_SENSOR_ACME_OT_LIST]:
             sens = await sensor.new_sensor(messagesensor)
             cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_VALUE_TYPE]))
+
+    if CONF_SENSOR_ACME_OT_BINARY_LIST in config:
+        for messagesensor in config[CONF_SENSOR_ACME_OT_BINARY_LIST]:
+            sens = await sensor.new_sensor(messagesensor)
+            cg.add(var.add_sensor_acme_binary(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_BINARY_BIT]))
 
     if CONF_SENSOR_STATUS_MASTER_CHENABLE in config:
         conf = config[CONF_SENSOR_STATUS_MASTER_CHENABLE]

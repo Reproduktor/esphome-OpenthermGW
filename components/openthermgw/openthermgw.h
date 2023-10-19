@@ -46,7 +46,16 @@ class OpenthermGW: public PollingComponent
         sensor::Sensor *acmeSensor;
     };
 
+    struct AcmeBinarySensorInfo
+    {
+        int messageID;
+        bool valueOnRequest;
+        int bit;
+        binary_sensor::BinarySensor *acmeSensor;
+    };
+
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
+    static std::map<int, std::vector<AcmeBinarySensorInfo *> *> acme_binary_sensor_map;
 
     //text_sensor::TextSensor *sensor_version;
     static binary_sensor::BinarySensor *sensor_status_slave_fault;
@@ -86,6 +95,7 @@ class OpenthermGW: public PollingComponent
     void set_switch_dhw_pump_override(switch_::Switch *s)                   { switch_dhw_pump_override              = s; }
     void set_switch_dhw_pump_override_mode(switch_::Switch *s)              { switch_dhw_pump_override_mode         = s; }
     void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
+    void add_sensor_acme_binary(sensor::Sensor *s, int messageid, bool valueonrequest, int bit);
 
     OpenthermGW();
 
@@ -97,22 +107,6 @@ class OpenthermGW: public PollingComponent
     void update() override;
     void loop() override;
 };
-/*
-class Sensor_Version: public PollingComponent, public TextSensor
-{
-    public:
-        Sensor_Version() : PollingComponent(3600000) {}
-
-        void setup() override
-        {
-            publish_state(VERSION);
-        }
-        void update() override
-        {
-            publish_state(VERSION);
-        }
-}
-*/
 }
 }
 
