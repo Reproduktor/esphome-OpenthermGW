@@ -229,7 +229,7 @@ namespace openthermgw {
         if(pSensorList == nullptr)
         {
             pSensorList = new std::vector<AcmeBinarySensorInfo *>();
-            acme_sensor_map[pAcmeBinarySensorInfo->messageID] = pSensorList;
+            acme_binary_sensor_map[pAcmeBinarySensorInfo->messageID] = pSensorList;
         }
         pSensorList->push_back(pAcmeBinarySensorInfo);
     }
