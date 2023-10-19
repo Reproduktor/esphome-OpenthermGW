@@ -125,9 +125,9 @@ async def to_code(config):
             cg.add(var.add_sensor_acme(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_VALUE_TYPE]))
 
     if CONF_SENSOR_ACME_OT_BINARY_LIST in config:
-        for messagesensor in config[CONF_SENSOR_ACME_OT_BINARY_LIST]:
-            sens = await binary_sensor.new_binary_sensor(messagesensor)
-            cg.add(var.add_sensor_acme_binary(sens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_BINARY_BIT]))
+        for messagebinarysensor in config[CONF_SENSOR_ACME_OT_BINARY_LIST]:
+            binarysens = await binary_sensor.new_binary_sensor(messagebinarysensor)
+            cg.add(var.add_sensor_acme_binary(binarysens, messagesensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagesensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagesensor[CONF_SENSOR_ACME_OT_BINARY_BIT]))
 
     if CONF_SENSOR_STATUS_MASTER_CHENABLE in config:
         conf = config[CONF_SENSOR_STATUS_MASTER_CHENABLE]
