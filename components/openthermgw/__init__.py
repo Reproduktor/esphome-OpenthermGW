@@ -50,7 +50,7 @@ CONF_SCHEMA_ACME_OT = sensor.sensor_schema().extend(
 
 CONF_SENSOR_ACME_OT_BINARY_LIST = "acme_opentherm_binary_sensors"
 CONF_SENSOR_ACME_OT_BINARY_BIT = "bitindex"
-CONF_SCHEMA_ACME_OT_BINARY = sensor.sensor_schema().extend(
+CONF_SCHEMA_ACME_OT_BINARY = binary_sensor.binary_sensor_schema().extend(
     {
         cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
         cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
