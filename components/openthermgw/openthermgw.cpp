@@ -17,7 +17,7 @@ esphome::binary_sensor::BinarySensor *esphome::openthermgw::OpenthermGW::sensor_
 esphome::switch_::Switch *esphome::openthermgw::OpenthermGW::switch_dhw_pump_override;
 esphome::switch_::Switch *esphome::openthermgw::OpenthermGW::switch_dhw_pump_override_mode;
 std::map<int, std::vector<esphome::openthermgw::OpenthermGW::AcmeSensorInfo *> *> esphome::openthermgw::OpenthermGW::acme_sensor_map;
-std::map<int, std::vector<esphome::openthermgw::OpenthermGW::AcmeBinarySensorInfo *> *> esphome::openthermgw::OpenthermGW::acme_sensor_binary;
+std::map<int, std::vector<esphome::openthermgw::OpenthermGW::AcmeBinarySensorInfo *> *> esphome::openthermgw::OpenthermGW::acme_binary_sensor_map;
 
 namespace esphome {
 namespace openthermgw {
@@ -217,7 +217,7 @@ namespace openthermgw {
         pSensorList->push_back(pAcmeSensorInfo);
     }
 
-    void OpenthermGW::add_sensor_acme_binary(sensor::Sensor *s, int messageid, bool valueonrequest, int bit)
+    void OpenthermGW::add_sensor_acme_binary(binary_sensor::BinarySensor *s, int messageid, bool valueonrequest, int bit)
     {
         AcmeBinarySensorInfo *pAcmeBinarySensorInfo = new AcmeBinarySensorInfo();
         pAcmeBinarySensorInfo->messageID = messageid;
@@ -225,7 +225,7 @@ namespace openthermgw {
         pAcmeBinarySensorInfo->bit = bit;
         pAcmeBinarySensorInfo->acmeSensor = s;
 
-        std::vector<AcmeBinarySensorInfo *> *pSensorList = acme_sensor_map[pAcmeBinarySensorInfo->messageID];
+        std::vector<AcmeBinarySensorInfo *> *pSensorList = acme_binary_sensor_map[pAcmeBinarySensorInfo->messageID];
         if(pSensorList == nullptr)
         {
             pSensorList = new std::vector<AcmeBinarySensorInfo *>();
