@@ -135,7 +135,7 @@ namespace openthermgw {
             {
                 for(AcmeBinarySensorInfo *pBinarySensorInfo: *pBinarySensorList)
                 {
-                    bool bitvalue = sOT->getUInt(response) & 1<<(pBinarySensorInfo->bit - 1);
+                    bool bitvalue = sOT->getUInt(response) & (1<<(pBinarySensorInfo->bit - 1));
                     pBinarySensorInfo->acmeSensor->publish_state(bitvalue);
                 }
             }
