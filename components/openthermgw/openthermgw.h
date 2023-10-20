@@ -69,6 +69,7 @@ class OpenthermGW: public PollingComponent
     void set_switch_dhw_pump_override_mode(switch_::Switch *s)              { switch_dhw_pump_override_mode         = s; }
     void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
     void add_sensor_acme_binary(binary_sensor::BinarySensor *s, int messageid, bool valueonrequest, int bit);
+    void add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit);
 
     OpenthermGW();
 

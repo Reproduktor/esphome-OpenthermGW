@@ -148,6 +148,11 @@ async def to_code(config):
             binarysens = await binary_sensor.new_binary_sensor(messagebinarysensor)
             cg.add(var.add_sensor_acme_binary(binarysens, messagebinarysensor[CONF_SENSOR_ACME_OT_MESSAGE_ID], messagebinarysensor[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messagebinarysensor[CONF_SENSOR_ACME_OT_BINARY_BIT]))
 
+    if CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST in config:
+        for messageoverrideswitch in config[CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST]:
+            overrideswitch = await switch.new_switch(messageoverrideswitch)
+            cg.add(var.add_override_switch(overrideswitch, messageoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID], messageoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messageoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT]))
+
 
 def opentherm_component_schema():
     """Create a schema for a OpenTherm component.

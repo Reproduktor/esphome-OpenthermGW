@@ -150,6 +150,12 @@ namespace openthermgw {
         pSensorList->push_back(pAcmeBinarySensorInfo);
     }
 
+    void OpenthermGW::add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit)
+    {
+        
+    }
+
+
     void OpenthermGW::setup()
     {
         // This will be called once to set up the component
