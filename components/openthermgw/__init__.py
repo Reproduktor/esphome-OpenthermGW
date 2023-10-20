@@ -114,10 +114,10 @@ CONFIG_SCHEMA = cv.Schema(
             cv.ensure_list(CONF_SCHEMA_ACME_OT), cv.Length(min=1, max=200)
             ),
         cv.Optional(CONF_SENSOR_ACME_OT_BINARY_LIST): cv.All(
-            cv.ensure_list(CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH), cv.Length(min=1, max=200)
+            cv.ensure_list(CONF_SCHEMA_ACME_OT_BINARY), cv.Length(min=1, max=200)
             ),
         cv.Optional(CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST): cv.All(
-            cv.ensure_list(CONF_SCHEMA_ACME_OT_BINARY), cv.Length(min=1, max=200)
+            cv.ensure_list(CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH), cv.Length(min=1, max=200)
             ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
