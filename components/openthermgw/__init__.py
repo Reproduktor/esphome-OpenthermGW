@@ -20,6 +20,10 @@ local_switch_ns = cg.esphome_ns.namespace("local_switch")
 
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 
+SimpleSwitch = opentherm_ns.class_(
+    "SimpleSwitch", switch.Switch, cg.Component
+)
+
 # OverrideNumber = opentherm_ns.class_(
 #     "OverrideNumber", number.Number, cg.Component
 # )
@@ -48,6 +52,7 @@ CONF_SCHEMA_ACME_OT = sensor.sensor_schema().extend(
     }
     )
 
+
 CONF_SENSOR_ACME_OT_BINARY_LIST = "acme_opentherm_binary_sensors"
 CONF_SENSOR_ACME_OT_BINARY_BIT = "bitindex"
 CONF_SCHEMA_ACME_OT_BINARY = binary_sensor.binary_sensor_schema().extend(
@@ -58,7 +63,18 @@ CONF_SCHEMA_ACME_OT_BINARY = binary_sensor.binary_sensor_schema().extend(
     }
     )
 
+CONF_SCHEMA_SIMPLE_SWITCH = cv.maybe_simple_value(
+    switch.switch_schema(
+        SimpleSwitch,
+        entity_category=ENTITY_CATEGORY_CONFIG,
+        default_restore_mode="RESTORE_DEFAULT_OFF",
+        ),
+        key=CONF_NAME,
+    )
+
+
 CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST = "acme_opentherm_override_binary_switches"
+CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE = "acme_opentherm_override_binary_value"
 CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
     switch.switch_schema(
         OverrideBinarySwitch,
@@ -69,6 +85,7 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
                 cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
                 cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
                 cv.Required(CONF_SENSOR_ACME_OT_BINARY_BIT): cv.int_range(1, 16), #1-16 bit index
+                cv.Required(CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE): CONF_SCHEMA_SIMPLE_SWITCH,
             }
         ),
         key=CONF_NAME,
@@ -151,7 +168,12 @@ async def to_code(config):
     if CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST in config:
         for messageoverrideswitch in config[CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST]:
             overrideswitch = await switch.new_switch(messageoverrideswitch)
-            cg.add(var.add_override_switch(overrideswitch, messageoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID], messageoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST], messageoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT]))
+            if CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE in messageoverrideswitch:
+                overridevalue = await switch.new_switch(messageoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE])
+            cg.add(var.add_override_switch(overrideswitch, messageoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID],
+                                           messageoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST],
+                                           messageoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT],
+                                           overridevalue))
 
 
 def opentherm_component_schema():

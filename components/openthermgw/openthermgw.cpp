@@ -38,6 +38,26 @@ namespace openthermgw {
     void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
     {
         ESP_LOGD(LOGTOPIC, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), mOT->getDataID(request), request&0xffff);
+        
+        // override binary
+        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList = override_binary_switch_map[mOT->getDataID(request)];
+        if(pBinaryOverrideList != nullptr)
+        {
+            for(OverrideBinarySwitchInfo *pOverride: *pBinaryOverrideList)
+            {
+                if(pOverride->binaryswitch->state && pOverride->valueswitch != nullptr)
+                {
+                    unsigned short origbitfield = mOT->getUInt(request);
+                    bool origvalue = origbitfield & (1<<(pBinarySensorInfo->bit - 1));
+                    if(origvalue != pOverride->valueswitch->state)
+                    {
+                        ESP_LOGD(LOGTOPIC, "Overriding bit %d (was %d, overriding to %d)", pBinarySensorInfo->bit, origvalue, pOverride->valueswitch->state)
+                    }
+                    unsigned short newbitfield = origbitfield & (0xffff - (1<<(pBinarySensorInfo->bit - 1))) | (pOverride->valueswitch->state << (pBinarySensorInfo->bit - 1));
+                }
+            }
+        }
+
         unsigned long response = mOT->sendRequest(request);
         if (response)
         {
@@ -151,13 +171,14 @@ namespace openthermgw {
         pSensorList->push_back(pAcmeBinarySensorInfo);
     }
 
-    void OpenthermGW::add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit)
+    void OpenthermGW::add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit, openthermgw::SimpleSwitch *v)
     {
         OverrideBinarySwitchInfo *pOverrideBinarySwitchInfo = new OverrideBinarySwitchInfo();
         pOverrideBinarySwitchInfo->messageID = messageid;
         pOverrideBinarySwitchInfo->valueOnRequest = valueonrequest;
         pOverrideBinarySwitchInfo->bit = bit;
         pOverrideBinarySwitchInfo->binaryswitch = s;
+        pOverrideBinarySwitchInfo->valueswitch = v;
 
         std::vector<OverrideBinarySwitchInfo *> *pSwitchList = override_binary_switch_map[pOverrideBinarySwitchInfo->messageID];
         if(pSwitchList == nullptr)
@@ -191,6 +212,7 @@ namespace openthermgw {
     {
         ESP_LOGD(LOGTOPIC, "acme messages handdled: %d", acme_sensor_map.size());
         ESP_LOGD(LOGTOPIC, "acme binary messages handdled: %d", acme_binary_sensor_map.size());
+        ESP_LOGD(LOGTOPIC, "acme binary overrides handdled: %d", override_binary_switch_map.size());
     }
 
     void OpenthermGW::loop()
@@ -203,7 +225,6 @@ namespace openthermgw {
 
     OverrideBinarySwitch::OverrideBinarySwitch()
     {
-        state_ = false;
     }
 
     void OverrideBinarySwitch::setup()
@@ -218,6 +239,22 @@ namespace openthermgw {
             state_ = state;
             this->publish_state(state);
         }
+    }
+
+//////////////////////////////////////////////////////
+
+    SimpleSwitch::SimpleSwitch()
+    {
+    }
+
+    void SimpleSwitch::setup()
+    {
+        this->state = this->get_initial_state_with_restore_mode().value_or(false);
+    }
+
+    void SimpleSwitch::write_state(bool s)
+    {
+        this->publish_state(s);
     }
 
 }

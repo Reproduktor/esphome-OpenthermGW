@@ -18,6 +18,18 @@ namespace openthermgw {
 static const char *LOGTOPIC = "openthermgw_component_21";
 static const char *VERSION = "0.0.1.1";
 
+class SimpleSwitch : public switch_::Switch, public Component
+{
+public:
+    SimpleSwitch();
+
+    void setup() override;
+
+protected:
+    bool state_ {false};
+    void write_state(bool state) override;
+
+};
 
 class OverrideBinarySwitch : public switch_::Switch, public Component
 {
@@ -74,6 +86,7 @@ class OpenthermGW: public PollingComponent
         bool valueOnRequest;
         int bit;
         OverrideBinarySwitch *binaryswitch;
+        openthermgw::SimpleSwitch *valueswitch;
     };
 
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
@@ -92,7 +105,7 @@ class OpenthermGW: public PollingComponent
     void set_switch_dhw_pump_override_mode(switch_::Switch *s)              { switch_dhw_pump_override_mode         = s; }
     void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
     void add_sensor_acme_binary(binary_sensor::BinarySensor *s, int messageid, bool valueonrequest, int bit);
-    void add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit);
+    void add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit, openthermgw::SimpleSwitch *v);
 
     OpenthermGW();
 
