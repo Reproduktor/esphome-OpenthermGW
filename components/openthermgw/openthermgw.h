@@ -18,6 +18,20 @@ namespace openthermgw {
 static const char *LOGTOPIC = "openthermgw_component_21";
 static const char *VERSION = "0.0.1.1";
 
+
+class OverrideBinarySwitch : public switch_::Switch, public Component
+{
+public:
+    OverrideBinarySwitch();
+
+    void setup() override;
+
+protected:
+    bool state_ {false};
+    void write_state(bool state) override;
+
+};
+
 class OpenthermGW: public PollingComponent
 {
     private:
@@ -82,18 +96,6 @@ class OpenthermGW: public PollingComponent
     void loop() override;
 };
 
-class OverrideBinarySwitch : public switch_::Switch, public Component
-{
-public:
-    OverrideBinarySwitch();
-
-    void setup() override;
-
-protected:
-    bool state_ {false};
-    void write_state(bool state) override;
-
-};
 }
 }
 
