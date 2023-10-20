@@ -54,7 +54,7 @@ namespace openthermgw {
                         ESP_LOGD(LOGTOPIC, "Overriding bit %d (was %d, overriding to %d)", pOverride->bit, origvalue, pOverride->valueswitch->state);
                     }
                     unsigned short newbitfield = origbitfield & (0xffff - (1<<(pOverride->bit - 1))) | (pOverride->valueswitch->state << (pOverride->bit - 1));
-                    request = mOT->buildRequest(mOT->getMessageType(request)), mOT->getDataID(request), newbitfield)
+                    request = mOT->buildRequest(mOT->getMessageType(request), mOT->getDataID(request), newbitfield);
                 }
             }
         }
