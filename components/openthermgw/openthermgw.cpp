@@ -180,5 +180,21 @@ namespace openthermgw {
     }
 
 
+//////////////////////////////////////////////////////
+
+    void OverrideBinarySwitch::setup()
+    {
+        this->state = this->get_initial_state_with_restore_mode().value_or(false);
+    }
+
+    void OverrideBinarySwitch::write_state(bool state)
+    {
+        if(state_ != state)
+        {
+            state_ = state;
+            this->publish_state(state);
+        }
+    }
+
 }
 }

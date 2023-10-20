@@ -80,6 +80,19 @@ class OpenthermGW: public PollingComponent
     void update() override;
     void loop() override;
 };
+
+class OverrideBinarySwitch : public switch_::Switch, public Component
+{
+public:
+    OverrideBinarySwitch();
+
+    void setup() override;
+
+protected:
+    bool state_ {false};
+    void write_state(bool state) override;
+
+};
 }
 }
 
