@@ -2,9 +2,11 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, binary_sensor
+from esphome.components import sensor, binary_sensor, switch, number
+from esphome.automation import maybe_simple_id
 from esphome import pins
 from esphome.const import *
+from esphome.const import CONF_ID, ENTITY_CATEGORY_CONFIG, CONF_NAME
 from esphome.core import coroutine_with_priority
 
 CONF_MASTER_IN_PIN = "master_in_pin"
@@ -17,6 +19,19 @@ opentherm_ns = cg.esphome_ns.namespace("openthermgw")
 local_switch_ns = cg.esphome_ns.namespace("local_switch")
 
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
+
+OverrideNumber = opentherm_ns.class_(
+    "OverrideNumber", number.Number, cg.Component
+)
+OverrideNumberSwitch = opentherm_ns.class_(
+    "OverrideSwitch", switch.Switch, cg.Component
+)
+OverrideBinary = opentherm_ns.class_(
+    "OverrideBinary", switch.Switch, cg.Component
+)
+OverrideBinarySwitch = opentherm_ns.class_(
+    "OverrideSwitch", switch.Switch, cg.Component
+)
 
 AUTO_LOAD = ['sensor', 'binary_sensor', 'switch']
 MULTI_CONF = False
@@ -43,6 +58,49 @@ CONF_SCHEMA_ACME_OT_BINARY = binary_sensor.binary_sensor_schema().extend(
     }
     )
 
+CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST = "acme_opentherm_override_binary_switches"
+CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
+    switch.switch_schema(
+        OverrideBinarySwitch,
+        entity_category=ENTITY_CATEGORY_CONFIG,
+        default_restore_mode="RESTORE_DEFAULT_OFF",
+        ).extend(
+            {
+                cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
+                cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
+                cv.Required(CONF_SENSOR_ACME_OT_BINARY_BIT): cv.int_range(1, 16), #1-16 bit index
+            }
+        ),
+        key=CONF_NAME,
+    )
+
+# CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_LIST = "acme_opentherm_override_binaries"
+# CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY = switch.switch_schema(
+#     OverrideBinary,
+#     entity_category=ENTITY_CATEGORY_CONFIG,
+#     default_restore_mode="RESTORE_DEFAULT_OFF",
+#     ).extend(
+#         {
+#             cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
+#             cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
+#             cv.Required(CONF_SENSOR_ACME_OT_BINARY_BIT): cv.int_range(1, 16), #1-16 bit index
+#         }
+#     )
+
+# CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_LIST = "acme_opentherm_override_binaries"
+# CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY = switch.switch_schema(
+#     OverrideSwitch,
+#     entity_category=ENTITY_CATEGORY_CONFIG,
+#     default_restore_mode="RESTORE_DEFAULT_OFF",
+#     )
+
+# CONF_SENSOR_ACME_OT_OVERRIDE_NUMBER_LIST = "acme_opentherm_override_numbers"
+# CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = number.NUMBER_SCHEMA.extend(
+#     {
+#         OverrideSwitch,
+#         entity_category=ENTITY_CATEGORY_CONFIG,
+#         default_restore_mode="RESTORE_DEFAULT_OFF",
+#     }
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -56,6 +114,9 @@ CONFIG_SCHEMA = cv.Schema(
             cv.ensure_list(CONF_SCHEMA_ACME_OT), cv.Length(min=1, max=200)
             ),
         cv.Optional(CONF_SENSOR_ACME_OT_BINARY_LIST): cv.All(
+            cv.ensure_list(CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH), cv.Length(min=1, max=200)
+            ),
+        cv.Optional(CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST): cv.All(
             cv.ensure_list(CONF_SCHEMA_ACME_OT_BINARY), cv.Length(min=1, max=200)
             ),
     }
