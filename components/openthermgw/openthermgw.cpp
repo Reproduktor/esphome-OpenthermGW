@@ -48,12 +48,12 @@ namespace openthermgw {
                 if(pOverride->binaryswitch->state && pOverride->valueswitch != nullptr)
                 {
                     unsigned short origbitfield = mOT->getUInt(request);
-                    bool origvalue = origbitfield & (1<<(pBinarySensorInfo->bit - 1));
+                    bool origvalue = origbitfield & (1<<(pOverride->bit - 1));
                     if(origvalue != pOverride->valueswitch->state)
                     {
-                        ESP_LOGD(LOGTOPIC, "Overriding bit %d (was %d, overriding to %d)", pBinarySensorInfo->bit, origvalue, pOverride->valueswitch->state)
+                        ESP_LOGD(LOGTOPIC, "Overriding bit %d (was %d, overriding to %d)", pOverride->bit, origvalue, pOverride->valueswitch->state)
                     }
-                    unsigned short newbitfield = origbitfield & (0xffff - (1<<(pBinarySensorInfo->bit - 1))) | (pOverride->valueswitch->state << (pBinarySensorInfo->bit - 1));
+                    unsigned short newbitfield = origbitfield & (0xffff - (1<<(pOverride->bit - 1))) | (pOverride->valueswitch->state << (pOverride->bit - 1));
                 }
             }
         }
