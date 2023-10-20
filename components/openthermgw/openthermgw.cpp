@@ -158,10 +158,10 @@ namespace openthermgw {
         pOverrideBinarySwitchInfo->bit = bit;
         pOverrideBinarySwitchInfo->binaryswitch = s;
 
-        std::vector<pOverrideBinarySwitchInfo *> *pSwitchList = override_binary_switch_map[pOverrideBinarySwitchInfo->messageID];
+        std::vector<OverrideBinarySwitchInfo *> *pSwitchList = override_binary_switch_map[pOverrideBinarySwitchInfo->messageID];
         if(pSwitchList == nullptr)
         {
-            pSwitchList = new std::vector<pOverrideBinarySwitchInfo *>();
+            pSwitchList = new std::vector<OverrideBinarySwitchInfo *>();
             override_binary_switch_map[pAcmeBinarySensorInfo->messageID] = pSwitchList;
         }
         pSwitchList->push_back(pOverrideBinarySwitchInfo);
