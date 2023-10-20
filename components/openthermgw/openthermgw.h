@@ -78,6 +78,7 @@ class OpenthermGW: public PollingComponent
 
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
     static std::map<int, std::vector<AcmeBinarySensorInfo *> *> acme_binary_sensor_map;
+    static std::map<int, std::vector<OverrideBinarySwitchInfo *> *> override_binary_switch_map;
 
     static switch_::Switch *switch_dhw_pump_override;
     static switch_::Switch *switch_dhw_pump_override_mode;
