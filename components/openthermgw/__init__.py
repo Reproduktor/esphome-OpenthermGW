@@ -20,17 +20,17 @@ local_switch_ns = cg.esphome_ns.namespace("local_switch")
 
 OpenThermGW = opentherm_ns.class_("OpenthermGW", cg.Component)
 
-OverrideNumber = opentherm_ns.class_(
-    "OverrideNumber", number.Number, cg.Component
-)
-OverrideNumberSwitch = opentherm_ns.class_(
-    "OverrideSwitch", switch.Switch, cg.Component
-)
-OverrideBinary = opentherm_ns.class_(
-    "OverrideBinary", switch.Switch, cg.Component
-)
+# OverrideNumber = opentherm_ns.class_(
+#     "OverrideNumber", number.Number, cg.Component
+# )
+# OverrideNumberSwitch = opentherm_ns.class_(
+#     "OverrideSwitch", switch.Switch, cg.Component
+# )
+# OverrideBinary = opentherm_ns.class_(
+#     "OverrideBinary", switch.Switch, cg.Component
+# )
 OverrideBinarySwitch = opentherm_ns.class_(
-    "OverrideSwitch", switch.Switch, cg.Component
+    "OverrideBinarySwitch", switch.Switch, cg.Component
 )
 
 AUTO_LOAD = ['sensor', 'binary_sensor', 'switch']
