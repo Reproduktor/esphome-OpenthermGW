@@ -152,7 +152,19 @@ namespace openthermgw {
 
     void OpenthermGW::add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit)
     {
-        
+        OverrideBinarySwitchInfo *pOverrideBinarySwitchInfo = new OverrideBinarySwitchInfo();
+        pOverrideBinarySwitchInfo->messageID = messageid;
+        pOverrideBinarySwitchInfo->valueOnRequest = valueonrequest;
+        pOverrideBinarySwitchInfo->bit = bit;
+        pOverrideBinarySwitchInfo->binaryswitch = s;
+
+        std::vector<pOverrideBinarySwitchInfo *> *pSwitchList = override_binary_switch_map[pOverrideBinarySwitchInfo->messageID];
+        if(pSwitchList == nullptr)
+        {
+            pSwitchList = new std::vector<pOverrideBinarySwitchInfo *>();
+            override_binary_switch_map[pAcmeBinarySensorInfo->messageID] = pSwitchList;
+        }
+        pSwitchList->push_back(pOverrideBinarySwitchInfo);
     }
 
 
@@ -187,6 +199,11 @@ namespace openthermgw {
 
 
 //////////////////////////////////////////////////////
+
+    OverrideBinarySwitch::OverrideBinarySwitch()
+    {
+        state_ = false;
+    }
 
     void OverrideBinarySwitch::setup()
     {

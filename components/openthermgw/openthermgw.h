@@ -68,6 +68,14 @@ class OpenthermGW: public PollingComponent
         binary_sensor::BinarySensor *acmeSensor;
     };
 
+    struct OverrideBinarySwitchInfo
+    {
+        int messageID;
+        bool valueOnRequest;
+        int bit;
+        OverrideBinarySwitch *binaryswitch;
+    };
+
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
     static std::map<int, std::vector<AcmeBinarySensorInfo *> *> acme_binary_sensor_map;
 
