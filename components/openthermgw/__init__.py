@@ -83,7 +83,7 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
         ).extend(
             {
                 cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
-                cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
+                cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='true'): cv.boolean,
                 cv.Required(CONF_SENSOR_ACME_OT_BINARY_BIT): cv.int_range(1, 16), #1-16 bit index
                 cv.Required(CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE): CONF_SCHEMA_SIMPLE_SWITCH,
             }
