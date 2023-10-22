@@ -23,8 +23,8 @@ Ihor Myealnik's [Opentherm library](https://github.com/ihormelnyk/opentherm_libr
 ## Configuration
 The gateway is an ESPHome external component. To use it, you only need to include it in your configuration file:
 
-`
+```yaml
 external_components:
   - source: github://Reproduktor/esphome-openthermgw
     components: [ openthermgw ]
-`
+```
