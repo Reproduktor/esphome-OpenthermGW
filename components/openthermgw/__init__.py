@@ -42,7 +42,7 @@ OverrideBinarySwitch = opentherm_ns.class_(
     "OverrideBinarySwitch", switch.Switch, cg.Component
 )
 
-AUTO_LOAD = ['sensor', 'binary_sensor', 'switch', 'template_number']
+AUTO_LOAD = ['sensor', 'binary_sensor', 'switch', 'number']
 MULTI_CONF = False
 
 CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
