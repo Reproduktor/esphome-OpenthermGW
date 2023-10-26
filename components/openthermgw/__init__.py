@@ -78,7 +78,7 @@ CONF_SCHEMA_SIMPLE_SWITCH = cv.maybe_simple_value(
     )
 
 CONF_SCHEMA_NUMERIC_INPUT = cv.maybe_simple_value(
-    template_number.number_schema(
+    number.number_schema(
         SimpleNumber,
         entity_category=ENTITY_CATEGORY_CONFIG,
         ),
