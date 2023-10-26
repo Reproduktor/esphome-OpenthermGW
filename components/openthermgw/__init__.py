@@ -80,7 +80,7 @@ CONF_SCHEMA_SIMPLE_SWITCH = cv.maybe_simple_value(
 CONF_SCHEMA_NUMERIC_INPUT = cv.maybe_simple_value(
     number.CONFIG_SCHEMA(
         SimpleNumber,
-        entity_category=ENTITY_CATEGORY_CONFIG,
+       
         ),
         key=CONF_NAME,
     )
