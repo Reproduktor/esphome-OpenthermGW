@@ -18,6 +18,20 @@ namespace openthermgw {
 static const char *LOGTOPIC = "openthermgw_component_21";
 static const char *VERSION = "0.0.1.1";
 
+class SimpleNumber : public number::Number, public Component
+{
+public:
+    void setup() override;
+    void dump_config() override;
+
+protected:
+    void control(float value) override;
+    float initial_value_{NAN};
+    bool restore_value_{true};
+
+    ESPPreferenceObject pref_;
+};
+
 class SimpleSwitch : public switch_::Switch, public Component
 {
 public:
@@ -28,7 +42,6 @@ public:
 protected:
     bool state_ {false};
     void write_state(bool state) override;
-
 };
 
 class OverrideBinarySwitch : public switch_::Switch, public Component
@@ -41,8 +54,8 @@ public:
 protected:
     bool state_ {false};
     void write_state(bool state) override;
-
 };
+
 
 class OpenthermGW: public PollingComponent
 {
@@ -89,9 +102,19 @@ class OpenthermGW: public PollingComponent
         openthermgw::SimpleSwitch *valueswitch;
     };
 
+    struct OverrideNumericSwitchInfo
+    {
+        int messageID;
+        bool valueOnRequest;
+        int valueType;
+        OverrideBinarySwitch *binaryswitch;
+        openthermgw::SimpleNumber *valuenumber;
+    };
+
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
     static std::map<int, std::vector<AcmeBinarySensorInfo *> *> acme_binary_sensor_map;
     static std::map<int, std::vector<OverrideBinarySwitchInfo *> *> override_binary_switch_map;
+    static std::map<int, std::vector<OverrideNumericSwitchInfo *> *> override_numeric_switch_map;
 
     static switch_::Switch *switch_dhw_pump_override;
     static switch_::Switch *switch_dhw_pump_override_mode;
@@ -106,6 +129,7 @@ class OpenthermGW: public PollingComponent
     void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
     void add_sensor_acme_binary(binary_sensor::BinarySensor *s, int messageid, bool valueonrequest, int bit);
     void add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit, openthermgw::SimpleSwitch *v);
+    void add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, openthermgw::SimpleNumber *v);
 
     OpenthermGW();
 

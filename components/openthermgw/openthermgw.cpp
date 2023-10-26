@@ -190,6 +190,23 @@ namespace openthermgw {
         pSwitchList->push_back(pOverrideBinarySwitchInfo);
     }
 
+    void OpenthermGW::add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, openthermgw::SimpleNumber *v)
+    {
+        OverrideNumericSwitchInfo *pOverrideNumericSwitchInfo = new OverrideNumericSwitchInfo();
+        pOverrideNumericSwitchInfo->messageID = messageid;
+        pOverrideNumericSwitchInfo->valueOnRequest = valueonrequest;
+        pOverrideNumericSwitchInfo->valueType = valuetype;
+        pOverrideNumericSwitchInfo->binaryswitch = s;
+        pOverrideNumericSwitchInfo->valuenumber = v;
+
+        std::vector<OverrideNumericSwitchInfo *> *pSwitchList = override_numeric_switch_map[pOverrideNumericSwitchInfo->messageID];
+        if(pSwitchList == nullptr)
+        {
+            pSwitchList = new std::vector<OverrideNumericSwitchInfo *>();
+            override_numeric_switch_map[pOverrideNumericSwitchInfo->messageID] = pSwitchList;
+        }
+        pSwitchList->push_back(pOverrideNumericSwitchInfo);
+    }
 
     void OpenthermGW::setup()
     {
@@ -214,6 +231,7 @@ namespace openthermgw {
         ESP_LOGD(LOGTOPIC, "acme messages handdled: %d", acme_sensor_map.size());
         ESP_LOGD(LOGTOPIC, "acme binary messages handdled: %d", acme_binary_sensor_map.size());
         ESP_LOGD(LOGTOPIC, "acme binary overrides handdled: %d", override_binary_switch_map.size());
+        ESP_LOGD(LOGTOPIC, "acme numeric overrides handdled: %d", override_numeric_switch_map.size());
     }
 
     void OpenthermGW::loop()
@@ -258,5 +276,46 @@ namespace openthermgw {
         this->publish_state(s);
     }
 
+//////////////////////////////////////////////////////
+
+    void SimpleNumber::setup()
+    {
+        float value;
+        if (!this->restore_value_)
+        {
+            value = this->initial_value_;
+        }
+        else
+        {
+            this->pref_ = global_preferences->make_preference<float>(this->get_object_id_hash());
+            if (!this->pref_.load(&value))
+            {
+                if (!std::isnan(this->initial_value_))
+                {
+                    value = this->initial_value_;
+                }
+                else
+                {
+                    value = this->traits.get_min_value();
+                }
+            }
+        }
+        this->publish_state(value);
+    }
+
+    void SimpleNumber::control(float value)
+    {
+        // this->set_trigger_->trigger(value);
+
+        this->publish_state(value);
+
+        if (this->restore_value_)
+            this->pref_.save(&value);
+    }
+
+    void SimpleNumber::dump_config()
+    {
+        LOG_NUMBER(LOGTOPIC, "Simple Number", this);
+    }
 }
 }

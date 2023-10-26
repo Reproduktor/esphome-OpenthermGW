@@ -24,6 +24,10 @@ SimpleSwitch = opentherm_ns.class_(
     "SimpleSwitch", switch.Switch, cg.Component
 )
 
+SimpleNumber = opentherm_ns.class_(
+    "SimpleNumber", number.Number, cg.Component
+)
+
 # OverrideNumber = opentherm_ns.class_(
 #     "OverrideNumber", number.Number, cg.Component
 # )
@@ -37,7 +41,7 @@ OverrideBinarySwitch = opentherm_ns.class_(
     "OverrideBinarySwitch", switch.Switch, cg.Component
 )
 
-AUTO_LOAD = ['sensor', 'binary_sensor', 'switch']
+AUTO_LOAD = ['sensor', 'binary_sensor', 'switch', 'number']
 MULTI_CONF = False
 
 CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
@@ -72,6 +76,14 @@ CONF_SCHEMA_SIMPLE_SWITCH = cv.maybe_simple_value(
         key=CONF_NAME,
     )
 
+CONF_SCHEMA_NUMERIC_INPUT = cv.maybe_simple_value(
+    number.number_schema(
+        SimpleNumber,
+        entity_category=ENTITY_CATEGORY_CONFIG,
+        ),
+        key=CONF_NAME,
+    )
+
 
 CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_SWITCH_LIST = "acme_opentherm_override_binary_switches"
 CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE = "acme_opentherm_override_binary_value"
@@ -90,6 +102,25 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
         ),
         key=CONF_NAME,
     )
+
+CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST = "acme_opentherm_override_numeric_switches"
+CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE = "acme_opentherm_override_numeric_value"
+CONF_SCHEMA_ACME_OT_OVERRIDE_NUMERIC_SWITCH = cv.maybe_simple_value(
+    switch.switch_schema(
+        OverrideNumericSwitch,
+        entity_category=ENTITY_CATEGORY_CONFIG,
+        default_restore_mode="RESTORE_DEFAULT_OFF",
+        ).extend(
+            {
+                cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
+                cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='true'): cv.boolean,
+                cv.Optional(CONF_SENSOR_ACME_OT_VALUE_TYPE, default=0): cv.int_range(0, 7), # 0=u16, 1=s16, 2=f16, 3=u8LB, 4=u8HB, 5=s8LB, 6=s8HB, 7=REQUEST/RESPONSE
+                cv.Required(CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE): CONF_SCHEMA_NUMERIC_INPUT,
+            }
+        ),
+        key=CONF_NAME,
+    )
+
 
 # CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_LIST = "acme_opentherm_override_binaries"
 # CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY = switch.switch_schema(
