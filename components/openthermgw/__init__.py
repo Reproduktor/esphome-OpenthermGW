@@ -2,7 +2,8 @@ CODEOWNERS = ["@reproduktor/esphome-openthermgw"]
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, binary_sensor, switch, number
+from esphome.components import sensor, binary_sensor, switch
+from esphome.components.template import template_number
 from esphome.automation import maybe_simple_id
 from esphome import pins
 from esphome.const import *
@@ -41,7 +42,7 @@ OverrideBinarySwitch = opentherm_ns.class_(
     "OverrideBinarySwitch", switch.Switch, cg.Component
 )
 
-AUTO_LOAD = ['sensor', 'binary_sensor', 'switch', 'number']
+AUTO_LOAD = ['sensor', 'binary_sensor', 'switch', 'template_number']
 MULTI_CONF = False
 
 CONF_SENSOR_ACME_OT_LIST = "acme_opentherm_sensor_list"
@@ -77,7 +78,7 @@ CONF_SCHEMA_SIMPLE_SWITCH = cv.maybe_simple_value(
     )
 
 CONF_SCHEMA_NUMERIC_INPUT = cv.maybe_simple_value(
-    number.number_schema(
+    template_number.number_schema(
         SimpleNumber,
         entity_category=ENTITY_CATEGORY_CONFIG,
         ),
@@ -107,7 +108,7 @@ CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST = "acme_opentherm_override_nume
 CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE = "acme_opentherm_override_numeric_value"
 CONF_SCHEMA_ACME_OT_OVERRIDE_NUMERIC_SWITCH = cv.maybe_simple_value(
     switch.switch_schema(
-        OverrideNumericSwitch,
+        OverrideBinarySwitch,
         entity_category=ENTITY_CATEGORY_CONFIG,
         default_restore_mode="RESTORE_DEFAULT_OFF",
         ).extend(
