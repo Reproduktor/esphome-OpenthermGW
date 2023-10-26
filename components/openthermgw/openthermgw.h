@@ -2,6 +2,7 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/switch/switch.h"
+#include "esphome/components/template/number/template_number.h"
 
 #include <OpenTherm.h>
 
@@ -15,22 +16,22 @@
 namespace esphome {
 namespace openthermgw {
 
-static const char *LOGTOPIC = "openthermgw_component_21";
-static const char *VERSION = "0.0.1.1";
+static const char *TAG = "openthermgw_component";
+static const char *VERSION = "0.0.1.2";
 
-class SimpleNumber : public number::Number, public Component
-{
-public:
-    void setup() override;
-    void dump_config() override;
+// class SimpleNumber : public number::Number, public Component
+// {
+// public:
+//     void setup() override;
+//     void dump_config() override;
 
-protected:
-    void control(float value) override;
-    float initial_value_{NAN};
-    bool restore_value_{true};
+// protected:
+//     void control(float value) override;
+//     float initial_value_{NAN};
+//     bool restore_value_{true};
 
-    ESPPreferenceObject pref_;
-};
+//     ESPPreferenceObject pref_;
+// };
 
 class SimpleSwitch : public switch_::Switch, public Component
 {
@@ -108,7 +109,7 @@ class OpenthermGW: public PollingComponent
         bool valueOnRequest;
         int valueType;
         OverrideBinarySwitch *binaryswitch;
-        openthermgw::SimpleNumber *valuenumber;
+        esphome::template_::TemplateNumber *valuenumber;
     };
 
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
@@ -129,7 +130,7 @@ class OpenthermGW: public PollingComponent
     void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
     void add_sensor_acme_binary(binary_sensor::BinarySensor *s, int messageid, bool valueonrequest, int bit);
     void add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit, openthermgw::SimpleSwitch *v);
-    void add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, openthermgw::SimpleNumber *v);
+    void add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, esphome::template_::TemplateNumber *v);
 
     OpenthermGW();
 

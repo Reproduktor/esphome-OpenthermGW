@@ -190,7 +190,7 @@ namespace openthermgw {
         pSwitchList->push_back(pOverrideBinarySwitchInfo);
     }
 
-    void OpenthermGW::add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, openthermgw::SimpleNumber *v)
+    void OpenthermGW::add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, esphome::template_::TemplateNumber *v)
     {
         OverrideNumericSwitchInfo *pOverrideNumericSwitchInfo = new OverrideNumericSwitchInfo();
         pOverrideNumericSwitchInfo->messageID = messageid;
@@ -212,7 +212,7 @@ namespace openthermgw {
     {
         // This will be called once to set up the component
         // think of it as the setup() call in Arduino
-        ESP_LOGD(LOGTOPIC, "Setup");
+        ESP_LOGD(TAG, "Setup");
 
         master_in_pin_sensor->publish_state(master_in_pin_);
         master_out_pin_sensor->publish_state(master_out_pin_);
@@ -228,10 +228,10 @@ namespace openthermgw {
 
     void OpenthermGW::update()
     {
-        ESP_LOGD(LOGTOPIC, "acme messages handdled: %d", acme_sensor_map.size());
-        ESP_LOGD(LOGTOPIC, "acme binary messages handdled: %d", acme_binary_sensor_map.size());
-        ESP_LOGD(LOGTOPIC, "acme binary overrides handdled: %d", override_binary_switch_map.size());
-        ESP_LOGD(LOGTOPIC, "acme numeric overrides handdled: %d", override_numeric_switch_map.size());
+        ESP_LOGD(TAG, "acme messages handdled: %d", acme_sensor_map.size());
+        ESP_LOGD(TAG, "acme binary messages handdled: %d", acme_binary_sensor_map.size());
+        ESP_LOGD(TAG, "acme binary overrides handdled: %d", override_binary_switch_map.size());
+        ESP_LOGD(TAG, "acme numeric overrides handdled: %d", override_numeric_switch_map.size());
     }
 
     void OpenthermGW::loop()
@@ -278,44 +278,44 @@ namespace openthermgw {
 
 //////////////////////////////////////////////////////
 
-    void SimpleNumber::setup()
-    {
-        float value;
-        if (!this->restore_value_)
-        {
-            value = this->initial_value_;
-        }
-        else
-        {
-            this->pref_ = global_preferences->make_preference<float>(this->get_object_id_hash());
-            if (!this->pref_.load(&value))
-            {
-                if (!std::isnan(this->initial_value_))
-                {
-                    value = this->initial_value_;
-                }
-                else
-                {
-                    value = this->traits.get_min_value();
-                }
-            }
-        }
-        this->publish_state(value);
-    }
+//     void SimpleNumber::setup()
+//     {
+//         float value;
+//         if (!this->restore_value_)
+//         {
+//             value = this->initial_value_;
+//         }
+//         else
+//         {
+//             this->pref_ = global_preferences->make_preference<float>(this->get_object_id_hash());
+//             if (!this->pref_.load(&value))
+//             {
+//                 if (!std::isnan(this->initial_value_))
+//                 {
+//                     value = this->initial_value_;
+//                 }
+//                 else
+//                 {
+//                     value = this->traits.get_min_value();
+//                 }
+//             }
+//         }
+//         this->publish_state(value);
+//     }
 
-    void SimpleNumber::control(float value)
-    {
-        // this->set_trigger_->trigger(value);
+//     void SimpleNumber::control(float value)
+//     {
+//         // this->set_trigger_->trigger(value);
 
-        this->publish_state(value);
+//         this->publish_state(value);
 
-        if (this->restore_value_)
-            this->pref_.save(&value);
-    }
+//         if (this->restore_value_)
+//             this->pref_.save(&value);
+//     }
 
-    void SimpleNumber::dump_config()
-    {
-        LOG_NUMBER(LOGTOPIC, "Simple Number", this);
-    }
+//     void SimpleNumber::dump_config()
+//     {
+//         LOG_NUMBER(TAG, "Simple Number", this);
+//     }
 }
 }
