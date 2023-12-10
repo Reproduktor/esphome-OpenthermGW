@@ -101,6 +101,26 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
         key=CONF_NAME,
     )
 
+CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = cv.maybe_simple_value(
+    number.NUMBER_SCHEMA.extend(
+    {
+        cv.GenerateID(): cv.declare_id(SimpleNumber),
+        cv.Optional(
+            CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_CONFIG
+        ): cv.entity_category,
+        cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float,
+        cv.Optional(CONF_MAX_VALUE, default=100): cv.float,
+        cv.Optional(CONF_MIN_VALUE, default=0): cv.float,
+        cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
+        cv.Optional(CONF_STEP, default=1): cv.float,
+        cv.Optional(CONF_SET_ACTION): automation.validate_automation(
+            single=True
+        ),
+    }
+    ).extend(cv.COMPONENT_SCHEMA),
+    key=CONF_NAME,
+)
+
 CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST = "acme_opentherm_override_numeric_switches"
 CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE = "acme_opentherm_override_numeric_value"
 CONF_SCHEMA_ACME_OT_OVERRIDE_NUMERIC_SWITCH = cv.maybe_simple_value(
@@ -113,7 +133,7 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_NUMERIC_SWITCH = cv.maybe_simple_value(
                 cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
                 cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='true'): cv.boolean,
                 cv.Optional(CONF_SENSOR_ACME_OT_VALUE_TYPE, default=0): cv.int_range(0, 7), # 0=u16, 1=s16, 2=f16, 3=u8LB, 4=u8HB, 5=s8LB, 6=s8HB, 7=REQUEST/RESPONSE
-                cv.Required(CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE): number.CONFIG_SCHEMA,
+                cv.Required(CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE): CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER,
             }
         ),
         key=CONF_NAME,
