@@ -232,7 +232,7 @@ async def to_code(config):
         for messagenumoverrideswitch in config[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST]:
             overridenumswitch = await switch.new_switch(messagenumoverrideswitch)
             if CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE in messagenumoverrideswitch:
-                overridenumvalue = await switch.new_switch(messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE])
+                overridenumvalue = await number.new_number(messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE])
             cg.add(var.add_override_numeric_switch(overridenumswitch, messagenumoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID],
                                            messagenumoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST],
                                            messagenumoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT],
