@@ -140,35 +140,6 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_NUMERIC_SWITCH = cv.maybe_simple_value(
         key=CONF_NAME,
     )
 
-
-# CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_LIST = "acme_opentherm_override_binaries"
-# CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY = switch.switch_schema(
-#     OverrideBinary,
-#     entity_category=ENTITY_CATEGORY_CONFIG,
-#     default_restore_mode="RESTORE_DEFAULT_OFF",
-#     ).extend(
-#         {
-#             cv.Required(CONF_SENSOR_ACME_OT_MESSAGE_ID): cv.positive_int,
-#             cv.Optional(CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST, default='false'): cv.boolean,
-#             cv.Required(CONF_SENSOR_ACME_OT_BINARY_BIT): cv.int_range(1, 16), #1-16 bit index
-#         }
-#     )
-
-# CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_LIST = "acme_opentherm_override_binaries"
-# CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY = switch.switch_schema(
-#     OverrideSwitch,
-#     entity_category=ENTITY_CATEGORY_CONFIG,
-#     default_restore_mode="RESTORE_DEFAULT_OFF",
-#     )
-
-# CONF_SENSOR_ACME_OT_OVERRIDE_NUMBER_LIST = "acme_opentherm_override_numbers"
-# CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = number.NUMBER_SCHEMA.extend(
-#     {
-#         OverrideSwitch,
-#         entity_category=ENTITY_CATEGORY_CONFIG,
-#         default_restore_mode="RESTORE_DEFAULT_OFF",
-#     }
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(OpenThermGW),
@@ -232,7 +203,11 @@ async def to_code(config):
         for messagenumoverrideswitch in config[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST]:
             overridenumswitch = await switch.new_switch(messagenumoverrideswitch)
             if CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE in messagenumoverrideswitch:
-                overridenumvalue = await number.new_number(messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE])
+                overridenumvalue = await number.new_number(messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE],
+                                                           min_value = messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE][CONF_MIN_VALUE],
+                                                           max_value = messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE][CONF_MAX_VALUE],
+                                                           step = messagenumoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE][CONF_STEP],
+                                                          )
             cg.add(var.add_override_numeric_switch(overridenumswitch, messagenumoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID],
                                            messagenumoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST],
                                            messagenumoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT],
