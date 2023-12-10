@@ -43,7 +43,7 @@ namespace openthermgw {
         unsigned short requestDataValue = request & 0xffff;
 
 
-        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(requestMessageType), requestDataID, requestDataValue);
+        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValue);
         
         // override binary
         std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList = override_binary_switch_map[requestDataID];
@@ -79,7 +79,7 @@ namespace openthermgw {
                     {
                         ESP_LOGD(TAG, "Overriding value (was %d, overriding to %d (%d))", pOverride->bit, origvalue, pOverride->valuenumber->state, newdata);
                     }
-                    request = mOT->buildRequest(requestMessageType, requestDataID, newdata);
+                    request = mOT->buildRequest(mOT->getMessageType(request), requestDataID, newdata);
                 }
             }
         }
