@@ -210,7 +210,7 @@ async def to_code(config):
                                                           )
             cg.add(var.add_override_numeric_switch(overridenumswitch, messagenumoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID],
                                            messagenumoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST],
-                                           messagenumoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT],
+                                           messagenumoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_TYPE],
                                            overridenumvalue))
 
 
