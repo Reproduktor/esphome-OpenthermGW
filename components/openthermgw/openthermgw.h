@@ -2,7 +2,6 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/switch/switch.h"
-#include "esphome/components/template/number/template_number.h"
 
 #include <OpenTherm.h>
 
@@ -19,19 +18,25 @@ namespace openthermgw {
 static const char *TAG = "openthermgw_component";
 static const char *VERSION = "0.0.1.2";
 
-// class SimpleNumber : public number::Number, public Component
-// {
-// public:
-//     void setup() override;
-//     void dump_config() override;
+class SimpleNumber : public number::Number, public Component
+{
+public:
+    void setup() override;
+    void dump_config() override;
+    float get_setup_priority() const override { return setup_priority::PROCESSOR; }
 
-// protected:
-//     void control(float value) override;
-//     float initial_value_{NAN};
-//     bool restore_value_{true};
+    Trigger<float> *get_set_trigger() const { return set_trigger_; }
+    void set_initial_value(float initial_value) { initial_value_ = initial_value; }
+    void set_restore_value(bool restore_value) { this->restore_value_ = restore_value; }
 
-//     ESPPreferenceObject pref_;
-// };
+ protected:
+    void control(float value) override;
+    float initial_value_{NAN};
+    bool restore_value_{true};
+    Trigger<float> *set_trigger_ = new Trigger<float>();
+
+    ESPPreferenceObject pref_;
+};
 
 class SimpleSwitch : public switch_::Switch, public Component
 {
