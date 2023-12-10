@@ -26,7 +26,7 @@ SimpleSwitch = opentherm_ns.class_(
 )
 
 SimpleNumber = opentherm_ns.class_(
-    "SimpleNumber", number.TemplateNumber, cg.Component
+    "SimpleNumber", number.Number, cg.Component
 )
 
 # OverrideNumber = opentherm_ns.class_(
