@@ -148,7 +148,7 @@ class OpenthermGW: public PollingComponent
     void loop() override;
 
 private:
-    static template<typename T> T convert_to_type(double value);
+    template<typename T> static T convert_to_type(double value);
     static unsigned short convert_to_data(double value, int type);
 };
 
