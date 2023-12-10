@@ -38,10 +38,15 @@ namespace openthermgw {
 
     void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
     {
-        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), mOT->getDataID(request), request&0xffff);
+        unsigned char requestDataID = mOT->getDataID(request);
+        unsigned char requestMessageType = mOT->getMessageType(request);
+        unsigned short requestDataValue = request & 0xffff;
+
+
+        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(requestMessageType), requestDataID, requestDataValue);
         
         // override binary
-        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList = override_binary_switch_map[mOT->getDataID(request)];
+        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList = override_binary_switch_map[requestDataID];
         if(pBinaryOverrideList != nullptr)
         {
             for(OverrideBinarySwitchInfo *pOverride: *pBinaryOverrideList)
@@ -56,6 +61,25 @@ namespace openthermgw {
                     }
                     unsigned short newbitfield = origbitfield & (0xffff - (1<<(pOverride->bit - 1))) | (pOverride->valueswitch->state << (pOverride->bit - 1));
                     request = mOT->buildRequest(mOT->getMessageType(request), mOT->getDataID(request), newbitfield);
+                }
+            }
+        }
+
+        // override numeric
+        std::vector<OverrideBinarySwitchInfo *> *pNumericOverrideList = override_numeric_switch_map[requestDataID];
+        if(pNumericOverrideList != nullptr)
+        {
+            for(OverrideNumericSwitchInfo *pOverride: *pNumericOverrideList)
+            {
+                if(pOverride->binaryswitch->state && pOverride->valuenumber != nullptr)
+                {
+                    unsigned short origdata = requestDataValue;
+                    unsigned short newdata = convert_to_data(pOverride->valuenumber->state, pOverride->valueType);
+                    if(origdata != newdata)
+                    {
+                        ESP_LOGD(TAG, "Overriding value (was %d, overriding to %d (%d))", pOverride->bit, origvalue, pOverride->valuenumber->state, newdata);
+                    }
+                    request = mOT->buildRequest(requestMessageType, requestDataID, newdata);
                 }
             }
         }
@@ -138,6 +162,79 @@ namespace openthermgw {
             }
         }
     }
+
+
+    template<typename T> T OpenthermGW::convert_to_type(double value)
+    {
+        T retvalue;
+
+        if (value < numeric_limits<T>::min())
+            retvalue = numeric_limits<T>::min();
+        else if (value > numeric_limits<T>::max())
+            retvalue = numeric_limits<T>::max();
+        else retvalue = static_cast<T>(value);
+
+        return retvalue;
+    }
+
+    unsigned short OpenthermGW::convert_to_data(double value, int type)
+    {
+        unsigned short data = 0;
+
+        switch (type)
+        {
+            case 0: // u16
+            {
+                data = convert_to_type<unsigned short>(value);
+                break;
+            }
+            case 1: // s16
+            {
+                data = convert_to_type<signed short>(value);
+                break;
+            }
+            case 2: // f16
+            {
+                if (value < -128)
+                    value = -128;
+                else if (value > 127)
+                    value = 127;
+
+                data = (value < 0) ? -(0x10000L - value * 256) : value * 256;
+                break;
+            }
+            case 3: // u8LB
+            {
+                data = convert_to_type<unsigned char>(value);
+                data &= 0x00ff;
+                break;
+            }
+            case 4: // u8HB
+            {
+                data = convert_to_type<unsigned char>(value) << 8;
+                break;
+            }
+            case 5: // s8LB
+            {
+                data = convert_to_type<signed char>(value);
+                data &= 0x00ff;
+                break;
+            }
+            case 6: // s8HB
+            {
+                data = convert_to_type<signed char>(value) << 8;
+                break;
+            }
+            default:
+            {
+                data = 0;
+                break;
+            }
+        }
+
+        return data;
+    }
+
 
     void OpenthermGW::add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype)
     {
