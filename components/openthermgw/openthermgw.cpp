@@ -37,7 +37,7 @@ namespace openthermgw {
 
     void OpenthermGW::processRequest(unsigned long request, OpenThermResponseStatus status)
     {
-        ESP_LOGD(LOGTOPIC, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), mOT->getDataID(request), request&0xffff);
+        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), mOT->getDataID(request), request&0xffff);
         
         // override binary
         std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList = override_binary_switch_map[mOT->getDataID(request)];
@@ -51,7 +51,7 @@ namespace openthermgw {
                     bool origvalue = origbitfield & (1<<(pOverride->bit - 1));
                     if(origvalue != pOverride->valueswitch->state)
                     {
-                        ESP_LOGD(LOGTOPIC, "Overriding bit %d (was %d, overriding to %d)", pOverride->bit, origvalue, pOverride->valueswitch->state);
+                        ESP_LOGD(TAG, "Overriding bit %d (was %d, overriding to %d)", pOverride->bit, origvalue, pOverride->valueswitch->state);
                     }
                     unsigned short newbitfield = origbitfield & (0xffff - (1<<(pOverride->bit - 1))) | (pOverride->valueswitch->state << (pOverride->bit - 1));
                     request = mOT->buildRequest(mOT->getMessageType(request), mOT->getDataID(request), newbitfield);
@@ -63,7 +63,7 @@ namespace openthermgw {
         if (response)
         {
             sOT->sendResponse(response);
-            ESP_LOGD(LOGTOPIC, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
+            ESP_LOGD(TAG, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
 
             // acme
             std::vector<AcmeSensorInfo *> *pSensorList = acme_sensor_map[sOT->getDataID(response)];
