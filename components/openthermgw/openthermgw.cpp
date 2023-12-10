@@ -66,7 +66,7 @@ namespace openthermgw {
         }
 
         // override numeric
-        std::vector<OverrideBinarySwitchInfo *> *pNumericOverrideList = override_numeric_switch_map[requestDataID];
+        std::vector<OverrideNumericSwitchInfo *> *pNumericOverrideList = override_numeric_switch_map[requestDataID];
         if(pNumericOverrideList != nullptr)
         {
             for(OverrideNumericSwitchInfo *pOverride: *pNumericOverrideList)
