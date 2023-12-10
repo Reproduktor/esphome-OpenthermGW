@@ -17,7 +17,7 @@ namespace openthermgw {
     void OpenthermGW::set_slave_in_pin(uint8_t pin) { slave_in_pin_ = pin; }
     void OpenthermGW::set_slave_out_pin(uint8_t pin) { slave_out_pin_ = pin; }
     
-    OpenthermGW::OpenthermGW(): PollingComponent(10000)
+    OpenthermGW::OpenthermGW(): PollingComponent(60000)
     {
         mOT = nullptr;
         sOT = nullptr;
@@ -46,7 +46,8 @@ namespace openthermgw {
         ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValue);
         
         // override binary
-        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList = override_binary_switch_map[requestDataID];
+        auto itBinaryOverrideList = override_binary_switch_map.find(requestDataID);
+        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList =  itBinaryOverrideList == override_binary_switch_map.end() ? itBinaryOverrideList->second : nullptr;
         if(pBinaryOverrideList != nullptr)
         {
             for(OverrideBinarySwitchInfo *pOverride: *pBinaryOverrideList)
@@ -66,7 +67,8 @@ namespace openthermgw {
         }
 
         // override numeric
-        std::vector<OverrideNumericSwitchInfo *> *pNumericOverrideList = override_numeric_switch_map[requestDataID];
+        auto itNumericOverrideList = override_numeric_switch_map.find(requestDataID);
+        std::vector<OverrideNumericSwitchInfo *> *pNumericOverrideList = itNumericOverrideList == override_numeric_switch_map.end() ? itNumericOverrideList->second : nullptr;
         if(pNumericOverrideList != nullptr)
         {
             for(OverrideNumericSwitchInfo *pOverride: *pNumericOverrideList)
@@ -91,7 +93,8 @@ namespace openthermgw {
             ESP_LOGD(TAG, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
 
             // acme
-            std::vector<AcmeSensorInfo *> *pSensorList = acme_sensor_map[sOT->getDataID(response)];
+            auto itSensorList = acme_sensor_map.find(sOT->getDataID(response));
+            std::vector<AcmeSensorInfo *> *pSensorList = itSensorList == acme_sensor_map.end() ? itSensorList->second : nullptr;
             if(pSensorList != nullptr)
             {
                 for(AcmeSensorInfo *pSensorInfo: *pSensorList)
@@ -151,7 +154,8 @@ namespace openthermgw {
             }
 
             // acme binary
-            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = acme_binary_sensor_map[sOT->getDataID(response)];
+            auto itBinarySensorList = acme_binary_sensor_map.find(sOT->getDataID(response));
+            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itSensorList == acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
             if(pBinarySensorList != nullptr)
             {
                 for(AcmeBinarySensorInfo *pBinarySensorInfo: *pBinarySensorList)
