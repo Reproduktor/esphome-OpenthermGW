@@ -77,7 +77,7 @@ namespace openthermgw {
                     unsigned short newdata = convert_to_data(pOverride->valuenumber->state, pOverride->valueType);
                     if(origdata != newdata)
                     {
-                        ESP_LOGD(TAG, "Overriding value (was %d, overriding to %d (%d))", pOverride->bit, origvalue, pOverride->valuenumber->state, newdata);
+                        ESP_LOGD(TAG, "Overriding value (was %d, overriding to %d (%d))", origdata, pOverride->valuenumber->state, newdata);
                     }
                     request = mOT->buildRequest(mOT->getMessageType(request), requestDataID, newdata);
                 }
