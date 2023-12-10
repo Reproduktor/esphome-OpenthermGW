@@ -47,7 +47,7 @@ namespace openthermgw {
         
         // override binary
         auto itBinaryOverrideList = override_binary_switch_map.find(requestDataID);
-        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList =  itBinaryOverrideList == override_binary_switch_map.end() ? itBinaryOverrideList->second : nullptr;
+        std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList =  itBinaryOverrideList != override_binary_switch_map.end() ? itBinaryOverrideList->second : nullptr;
         if(pBinaryOverrideList != nullptr)
         {
             for(OverrideBinarySwitchInfo *pOverride: *pBinaryOverrideList)
@@ -68,7 +68,7 @@ namespace openthermgw {
 
         // override numeric
         auto itNumericOverrideList = override_numeric_switch_map.find(requestDataID);
-        std::vector<OverrideNumericSwitchInfo *> *pNumericOverrideList = itNumericOverrideList == override_numeric_switch_map.end() ? itNumericOverrideList->second : nullptr;
+        std::vector<OverrideNumericSwitchInfo *> *pNumericOverrideList = itNumericOverrideList != override_numeric_switch_map.end() ? itNumericOverrideList->second : nullptr;
         if(pNumericOverrideList != nullptr)
         {
             for(OverrideNumericSwitchInfo *pOverride: *pNumericOverrideList)
@@ -94,7 +94,7 @@ namespace openthermgw {
 
             // acme
             auto itSensorList = acme_sensor_map.find(sOT->getDataID(response));
-            std::vector<AcmeSensorInfo *> *pSensorList = itSensorList == acme_sensor_map.end() ? itSensorList->second : nullptr;
+            std::vector<AcmeSensorInfo *> *pSensorList = itSensorList != acme_sensor_map.end() ? itSensorList->second : nullptr;
             if(pSensorList != nullptr)
             {
                 for(AcmeSensorInfo *pSensorInfo: *pSensorList)
@@ -155,7 +155,7 @@ namespace openthermgw {
 
             // acme binary
             auto itBinarySensorList = acme_binary_sensor_map.find(sOT->getDataID(response));
-            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itBinarySensorList == acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
+            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itBinarySensorList != acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
             if(pBinarySensorList != nullptr)
             {
                 for(AcmeBinarySensorInfo *pBinarySensorInfo: *pBinarySensorList)
