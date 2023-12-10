@@ -155,7 +155,7 @@ namespace openthermgw {
 
             // acme binary
             auto itBinarySensorList = acme_binary_sensor_map.find(sOT->getDataID(response));
-            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itSensorList == acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
+            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itBinarySensorList == acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
             if(pBinarySensorList != nullptr)
             {
                 for(AcmeBinarySensorInfo *pBinarySensorInfo: *pBinarySensorList)
