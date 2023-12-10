@@ -108,11 +108,11 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = cv.maybe_simple_value(
         cv.Optional(
             CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_CONFIG
         ): cv.entity_category,
-        cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float,
-        cv.Optional(CONF_MAX_VALUE, default=100): cv.float,
-        cv.Optional(CONF_MIN_VALUE, default=0): cv.float,
+        cv.Optional(CONF_MAX_VALUE, default=100): cv.float_,
+        cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
+        cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float_,
         cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
-        cv.Optional(CONF_STEP, default=1): cv.float,
+        cv.Optional(CONF_STEP, default=1): cv.float_,
         cv.Optional(CONF_SET_ACTION): automation.validate_automation(
             single=True
         ),
