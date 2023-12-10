@@ -79,7 +79,7 @@ namespace openthermgw {
                     {
                         ESP_LOGD(TAG, "Overriding value (was %d, overriding to %d (%d))", origdata, pOverride->valuenumber->state, newdata);
                     }
-                    request = mOT->buildRequest(mOT->getMessageType(request), requestDataID, newdata);
+                    request = mOT->buildRequest(mOT->getMessageType(request), mOT->getDataID(request), newdata);
                 }
             }
         }
@@ -168,10 +168,10 @@ namespace openthermgw {
     {
         T retvalue;
 
-        if (value < numeric_limits<T>::min())
-            retvalue = numeric_limits<T>::min();
-        else if (value > numeric_limits<T>::max())
-            retvalue = numeric_limits<T>::max();
+        if (value < std::numeric_limits<T>::min())
+            retvalue = std::numeric_limits<T>::min();
+        else if (value > std::numeric_limits<T>::max())
+            retvalue = std::numeric_limits<T>::max();
         else retvalue = static_cast<T>(value);
 
         return retvalue;
