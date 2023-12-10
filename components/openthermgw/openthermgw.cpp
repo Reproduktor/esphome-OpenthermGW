@@ -230,9 +230,9 @@ namespace openthermgw {
     void OpenthermGW::update()
     {
         ESP_LOGD(TAG, "acme messages handdled: %d", acme_sensor_map.size());
-        ESP_LOGD(TAG, "acme binary messages handdled: %d", acme_binary_sensor_map.size());
-        ESP_LOGD(TAG, "acme binary overrides handdled: %d", override_binary_switch_map.size());
-        ESP_LOGD(TAG, "acme numeric overrides handdled: %d", override_numeric_switch_map.size());
+        ESP_LOGD(TAG, "acme binary messages handled: %d", acme_binary_sensor_map.size());
+        ESP_LOGD(TAG, "acme binary overrides handled: %d", override_binary_switch_map.size());
+        ESP_LOGD(TAG, "acme numeric overrides handled: %d", override_numeric_switch_map.size());
     }
 
     void OpenthermGW::loop()

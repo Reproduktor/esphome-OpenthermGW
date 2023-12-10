@@ -113,6 +113,7 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = cv.maybe_simple_value(
         cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float_,
         cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
         cv.Optional(CONF_STEP, default=1): cv.float_,
+        cv.Optional(CONF_UNIT_OF_MEASUREMENT): cv.string_strict,
         # cv.Optional(CONF_SET_ACTION): automation.validate_automation(
         #     single=True
         # ),
@@ -226,6 +227,17 @@ async def to_code(config):
                                            messageoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST],
                                            messageoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT],
                                            overridevalue))
+
+    # if CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST in config:
+    #     for messagenumoverrideswitch in config[CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST]:
+    #         overridenumswitch = await switch.new_switch(messagenumoverrideswitch)
+    #         if CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE in messageoverrideswitch:
+    #             overridevalue = await switch.new_switch(messageoverrideswitch[CONF_SENSOR_ACME_OT_OVERRIDE_BINARY_VALUE])
+    #         cg.add(var.add_override_switch(overrideswitch, messageoverrideswitch[CONF_SENSOR_ACME_OT_MESSAGE_ID],
+    #                                        messageoverrideswitch[CONF_SENSOR_ACME_OT_VALUE_ON_REQUEST],
+    #                                        messageoverrideswitch[CONF_SENSOR_ACME_OT_BINARY_BIT],
+    #                                        overridevalue))
+
 
 
 def opentherm_component_schema():
