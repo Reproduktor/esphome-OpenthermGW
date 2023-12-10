@@ -114,7 +114,7 @@ class OpenthermGW: public PollingComponent
         bool valueOnRequest;
         int valueType;
         OverrideBinarySwitch *binaryswitch;
-        esphome::template_::TemplateNumber *valuenumber;
+        openthermgw::SimpleNumber *valuenumber;
     };
 
     static std::map<int, std::vector<AcmeSensorInfo *> *> acme_sensor_map;
@@ -135,7 +135,7 @@ class OpenthermGW: public PollingComponent
     void add_sensor_acme(sensor::Sensor *s, int messageid, bool valueonrequest, int valuetype);
     void add_sensor_acme_binary(binary_sensor::BinarySensor *s, int messageid, bool valueonrequest, int bit);
     void add_override_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int bit, openthermgw::SimpleSwitch *v);
-    void add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, esphome::template_::TemplateNumber *v);
+    void add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, openthermgw::SimpleNumber *v);
 
     OpenthermGW();
 

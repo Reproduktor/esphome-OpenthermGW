@@ -190,7 +190,7 @@ namespace openthermgw {
         pSwitchList->push_back(pOverrideBinarySwitchInfo);
     }
 
-    void OpenthermGW::add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, esphome::template_::TemplateNumber *v)
+    void OpenthermGW::add_override_numeric_switch(openthermgw::OverrideBinarySwitch *s, int messageid, bool valueonrequest, int valuetype, openthermgw::SimpleNumber *v)
     {
         OverrideNumericSwitchInfo *pOverrideNumericSwitchInfo = new OverrideNumericSwitchInfo();
         pOverrideNumericSwitchInfo->messageID = messageid;
