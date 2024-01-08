@@ -46,7 +46,7 @@ namespace openthermgw {
         ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x, status %s]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValue, sOT->statusToString(status));
         
         // Check validity of the original request
-        if(status != OpenThermResponseStatus::SUCCESS || !mOT->isValidRequest(request))
+        if(status != OpenThermResponseStatus::SUCCESS || !mOT->parity(request))
             return;
 
         // override binary
@@ -90,7 +90,7 @@ namespace openthermgw {
             }
         }
 
-        // Also check validity of modified request
+        // check validity of modified request
         if(!mOT->isValidRequest(request))
             return;
 
@@ -98,81 +98,87 @@ namespace openthermgw {
         unsigned long response = mOT->sendRequest(request);
 
         // process response if valid
-        if (response && sOT->isValidResponse(response))
+        if (response && sOT->parity(response))
         {
             sOT->sendResponse(response);
             ESP_LOGD(TAG, "Opentherm response [MessageType: %s, DataID: %d, Data: %x]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff);
 
-            // acme
-            auto itSensorList = acme_sensor_map.find(sOT->getDataID(response));
-            std::vector<AcmeSensorInfo *> *pSensorList = itSensorList != acme_sensor_map.end() ? itSensorList->second : nullptr;
-            if(pSensorList != nullptr)
+            // only if ACK reponse is received, process the data.
+            if(sOT->isValidResponse(response))
             {
-                for(AcmeSensorInfo *pSensorInfo: *pSensorList)
+                ESP_LOGD(TAG, "Opentherm response valid, processing sensors...");
+                
+                // acme
+                auto itSensorList = acme_sensor_map.find(sOT->getDataID(response));
+                std::vector<AcmeSensorInfo *> *pSensorList = itSensorList != acme_sensor_map.end() ? itSensorList->second : nullptr;
+                if(pSensorList != nullptr)
                 {
-                    switch(pSensorInfo->valueType)
+                    for(AcmeSensorInfo *pSensorInfo: *pSensorList)
                     {
-                        case 0: // u16
+                        switch(pSensorInfo->valueType)
                         {
-                            unsigned short value = sOT->getUInt(response);
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
+                            case 0: // u16
+                            {
+                                unsigned short value = sOT->getUInt(response);
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 1: // s16
+                            {
+                                short value = response & 0xffff;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 2: // f16
+                            {
+                                float value = sOT->getFloat(response);
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 3: // u8LB
+                            {
+                                unsigned char value = response & 0x00ff;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 4: // u8HB
+                            {
+                                unsigned char value = (response & 0xff00) >> 8;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 5: // s8LB
+                            {
+                                signed char value = response & 0x00ff;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 6: // s8HB
+                            {
+                                signed char value = (response & 0xff00) >> 8;
+                                pSensorInfo->acmeSensor->publish_state(value);
+                                break;
+                            }
+                            case 7: // RESPONSE
+                            {
+                                pSensorInfo->acmeSensor->publish_state((response >> 28) & 7);
+                                break;
+                            }
                         }
-                        case 1: // s16
-                        {
-                            short value = response & 0xffff;
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
-                        }
-                        case 2: // f16
-                        {
-                            float value = sOT->getFloat(response);
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
-                        }
-                        case 3: // u8LB
-                        {
-                            unsigned char value = response & 0x00ff;
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
-                        }
-                        case 4: // u8HB
-                        {
-                            unsigned char value = (response & 0xff00) >> 8;
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
-                        }
-                        case 5: // s8LB
-                        {
-                            signed char value = response & 0x00ff;
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
-                        }
-                        case 6: // s8HB
-                        {
-                            signed char value = (response & 0xff00) >> 8;
-                            pSensorInfo->acmeSensor->publish_state(value);
-                            break;
-                        }
-                        case 7: // RESPONSE
-                        {
-                            pSensorInfo->acmeSensor->publish_state((response >> 28) & 7);
-                            break;
-                        }
+
                     }
-
                 }
-            }
 
-            // acme binary
-            auto itBinarySensorList = acme_binary_sensor_map.find(sOT->getDataID(response));
-            std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itBinarySensorList != acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
-            if(pBinarySensorList != nullptr)
-            {
-                for(AcmeBinarySensorInfo *pBinarySensorInfo: *pBinarySensorList)
+                // acme binary
+                auto itBinarySensorList = acme_binary_sensor_map.find(sOT->getDataID(response));
+                std::vector<AcmeBinarySensorInfo *> *pBinarySensorList = itBinarySensorList != acme_binary_sensor_map.end() ? itBinarySensorList->second : nullptr;
+                if(pBinarySensorList != nullptr)
                 {
-                    bool bitvalue = sOT->getUInt(response) & (1<<(pBinarySensorInfo->bit - 1));
-                    pBinarySensorInfo->acmeSensor->publish_state(bitvalue);
+                    for(AcmeBinarySensorInfo *pBinarySensorInfo: *pBinarySensorList)
+                    {
+                        bool bitvalue = sOT->getUInt(response) & (1<<(pBinarySensorInfo->bit - 1));
+                        pBinarySensorInfo->acmeSensor->publish_state(bitvalue);
+                    }
                 }
             }
         }
