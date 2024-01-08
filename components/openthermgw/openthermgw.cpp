@@ -43,7 +43,7 @@ namespace openthermgw {
         unsigned short requestDataValue = request & 0xffff;
 
 
-        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x, status %s]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValu, sOT->statusToString(status));
+        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x, status %s]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValue, sOT->statusToString(status));
         
         if(status != OpenThermResponseStatus::SUCCESS)
             return;
