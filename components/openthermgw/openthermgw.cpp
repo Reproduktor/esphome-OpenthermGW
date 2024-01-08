@@ -43,8 +43,11 @@ namespace openthermgw {
         unsigned short requestDataValue = request & 0xffff;
 
 
-        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValue);
+        ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x, status %s]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValu, sOT->statusToString(status));
         
+        if(status != OpenThermResponseStatus::SUCCESS)
+            return;
+
         // override binary
         auto itBinaryOverrideList = override_binary_switch_map.find(requestDataID);
         std::vector<OverrideBinarySwitchInfo *> *pBinaryOverrideList =  itBinaryOverrideList != override_binary_switch_map.end() ? itBinaryOverrideList->second : nullptr;
@@ -90,7 +93,7 @@ namespace openthermgw {
         if (response)
         {
             sOT->sendResponse(response);
-            ESP_LOGD(TAG, "Opentherm response [MessageType: %s, DataID: %d, Data: %x, status %s]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff, sOT->statusToString(status));
+            ESP_LOGD(TAG, "Opentherm response [MessageType: %s, DataID: %d, Data: %x]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff);
 
             // acme
             auto itSensorList = acme_sensor_map.find(sOT->getDataID(response));
