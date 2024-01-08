@@ -45,7 +45,8 @@ namespace openthermgw {
 
         ESP_LOGD(TAG, "Opentherm request [MessageType: %s, DataID: %d, Data: %x, status %s]", mOT->messageTypeToString(mOT->getMessageType(request)), requestDataID, requestDataValue, sOT->statusToString(status));
         
-        if(status != OpenThermResponseStatus::SUCCESS)
+        // Check validity of the original request
+        if(status != OpenThermResponseStatus::SUCCESS || !mOT->isValidRequest(request))
             return;
 
         // override binary
@@ -89,8 +90,15 @@ namespace openthermgw {
             }
         }
 
+        // Also check validity of modified request
+        if(!mOT->isValidRequest(request))
+            return;
+
+        // Send the request
         unsigned long response = mOT->sendRequest(request);
-        if (response)
+
+        // process response if valid
+        if (response && sOT->isValidResponse(response))
         {
             sOT->sendResponse(response);
             ESP_LOGD(TAG, "Opentherm response [MessageType: %s, DataID: %d, Data: %x]", sOT->messageTypeToString(sOT->getMessageType(response)), sOT->getDataID(response), response&0xffff);
