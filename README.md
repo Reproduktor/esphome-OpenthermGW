@@ -1,21 +1,17 @@
 # OpenthermGW for ESPHome / Home assistant
  
-(as External component, by Reproduktor)
+(as External component, by Reproduktor, klubalo)
 
 ## Welcome!
 
 I have two main requirements to solve:
-1. I want to monitor what my QAA73 thermostat & Geminox THRi-DC boiler are up to
-2. I want to be able to override some settings at occasion. For example, I want to control the hot water circulating pump on my own.
+1. I want to monitor what my thermostat & boiler are up to
+2. I want to be able to control DHW temperature and control boiler heat period
 
+It's derived from [Reproduktor/esphome-OpenthermGW](https://github.com/Reproduktor/esphome-OpenthermGW) as I found his implementation simple and easy to expand.
+I needed **value_on_request** to work as my boiler doesn't accept T_Set and room temperature from thermostat - Boiler replies with UNKNOWN-DATAID to those write requests.
+**value_on_request** also works for override values so it can be used for overriding requests from thermostat for controlling boiler (this was already implemented by Reproduktor) and also for overriding responses from boiler. This functionality can be used for
 
-For some time, I've been using this [Opentherm Arduino shield from Jiří Praus](https://www.tindie.com/products/jiripraus/opentherm-gateway-arduino-shield/). I had it connected with an ESP8266-based board and using [Jiří's Arduino library](https://github.com/jpraus/arduino-opentherm) I added some MQTT communication to report the values and show them in my Home Assistant. I added OTA, so it was a practically usable solution. Once I was able to read the values, I let the project sleep and did not get to extend it for overriding the values.
-
-When the time finally came, I wished I could somehow port this to ESPHome. The ecosystem gives you lots for free, native Home Assistant API support is seamless. And here goes this project. It is still only in its beginning, please create an Issue if you observe a problem, or want the functionality extended. If you get me a coffee, I may be more willing to do something about it 😊
-
-[<img src="assorted/bmc_qr.png" width="150" height="150">](https://www.buymeacoffee.com/reproduktor)
-
-A code cleanup is needed - noted.
 
 ## Acknowledgement
 Ihor Myealnik's [Opentherm library](https://github.com/ihormelnyk/opentherm_library) is used by this component.
@@ -28,19 +24,20 @@ The gateway is an ESPHome external component. To use it, you only need to includ
 
 ```yaml
 external_components:
-  - source: github://Reproduktor/esphome-openthermgw
+  - source: github://klubalo/esphome-openthermgw@main
     components: [ openthermgw ]
 ```
 
 ### Hardware configuration
 You need to configure the pins, on which the Opentherm gateway is connected. Please note - `master` is the thermostat end, `slave` is the boiler end.
+Here is example for "sandwitch" of d1_mini between [TheHogNL master shield](https://www.tindie.com/products/thehognl/opentherm-master-shield-for-wemoslolin/) and [TheHogNL slave shield](https://www.tindie.com/products/thehognl/opentherm-slave-shield-for-wemoslolin/)
 
 ```yaml
 openthermgw:
-  master_in_pin: 19
-  master_out_pin: 17
-  slave_in_pin: 18
-  slave_out_pin: 16
+  master_in_pin: 4
+  master_out_pin: 5
+  slave_in_pin: 12
+  slave_out_pin: 14
 ```
 
 ### Sensors - preface
@@ -52,28 +49,28 @@ For the numeric sensors, you can create a list like this:
 
 ```yaml
   acme_opentherm_sensor_list:
-    - name: "ACME Control setpoint"
+    - name: "Control setpoint"
       device_class: "temperature"
       accuracy_decimals: 1
       unit_of_measurement: "°C"
       message_id: 1
       value_on_request: false
       value_type: 2
-    - name: "ACME Control setpoint 2"
+    - name: "Control setpoint 2"
       device_class: "temperature"
       accuracy_decimals: 1
       unit_of_measurement: "°C"
       message_id: 8
       value_on_request: false
       value_type: 2
-    - name: "ACME Room setpoint"
+    - name: "Room setpoint"
       device_class: "temperature"
       accuracy_decimals: 1
       unit_of_measurement: "°C"
       message_id: 16
-      value_on_request: false
+      value_on_request: true
       value_type: 2
-    - name: "ACME Relative modulation level"
+    - name: "Relative modulation level"
       device_class: "signal_strength"
       accuracy_decimals: 0
       unit_of_measurement: "%"
@@ -105,7 +102,7 @@ Sensor variables are inherited from ESPHome [Sensor component](https://esphome.i
       - 5 WRITE-ACK
       - 6 DATA-INVALID
       - 7 UNKNOWN-DATAID
-- **value_on_request** (*Optional*, boolean, default `False`): **Only `False` is supported at the moment. `True` does not have any effect.** If `false`, the value is read from the slave (boiler) response message. If `true`, the value is read from the master (thermostat) request message.
+- **value_on_request** (*Optional*, boolean, default `False`): If `false`, the value is read from the slave (boiler) response message (before response override). If `true`, the value is read from the master (thermostat) request message (before request override).
 
 ### Adding binary sensors
 
@@ -113,19 +110,19 @@ Binary sensors are added like this:
 
 ```yaml
   acme_opentherm_binary_sensors:
-    - name: "ACME Boiler fault"
+    - name: "Boiler fault"
       message_id: 0
       value_on_request: false
       bitindex: 1
-    - name: "ACME Boiler CH mode"
+    - name: "Boiler CH mode"
       message_id: 0
       value_on_request: false
       bitindex: 2
-    - name: "ACME Boiler DHW mode"
+    - name: "Boiler DHW mode"
       message_id: 0
       value_on_request: false
       bitindex: 3
-    - name: "ACME Boiler flame status"
+    - name: "Boiler flame status"
       message_id: 0
       value_on_request: false
       bitindex: 4
@@ -137,7 +134,7 @@ Sensor variables are inherited from ESPHome [Binary sensor component](https://es
 
 - **message_id** (*Required*, positive int): Opentherm Message ID to capture in the sensor
 - **bitindex** (*Required*, positive int range 1-16): The bitindex from the right (lsb) of the message data.
-- **value_on_request** (*Optional*, boolean, default `False`): **Only `False` is supported at the moment. `True` does not have any effect.** If `false`, the value is read from the slave (boiler) response message. If `true`, the value is read from the master (thermostat) request message.
+- **value_on_request** (*Optional*, boolean, default `False`): If `false`, the value is read from the slave (boiler) response message (after response override). If `true`, the value is read from the master (thermostat) request message (before request override).
 
 ### Overriding binary sensors
 
@@ -161,8 +158,28 @@ For every message yyou wish to override, configure an independent switch to cont
 
 - **message_id** (*Required*, positive int): Opentherm Message ID to capture in the sensor
 - **bitindex** (*Required*, positive int range 1-16): The bitindex from the right (lsb) of the message data.
-- **value_on_request** (*Optional*, boolean, default `True`): **Only `True` is supported at the moment. `False` does not have any effect.** If `false`, the value is overriden in the slave (boiler) response message. If `true`, the value is overriden in the master (thermostat) request message.
+- **value_on_request** (*Optional*, boolean, default `True`): If `false`, the value is overriden in the slave (boiler) response message (before sensor value is reported). If `true`, the value is overriden in the master (thermostat) request message (after sensor value is reported).
 - **acme_opentherm_override_binary_value** (*Required*, Switch): Secondary switch to control the state, to which the overriding should happen.
+
+### Overriding numeric sensors
+
+You can add an override numeric value like this:
+
+acme_opentherm_override_numeric_switches:
+    - name: "Override DHW setpoint"
+      message_id: 56
+      value_on_request: false
+      value_type: 2
+      id: override_dhw_switch
+      acme_opentherm_override_numeric_value:
+        name: "Override DHW setpoint temperature"
+        device_class: "Temperature"
+        mode: "Slider"
+        min_value: 30
+        max_value: 60
+        initial_value: 30
+        step: 1
+        id: override_dhw_temperature
 
 
 # Complete configuration
