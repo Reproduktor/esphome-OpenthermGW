@@ -105,11 +105,11 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = cv.maybe_simple_value(
     number.number_schema(
         SimpleNumber,
         entity_category=ENTITY_CATEGORY_CONFIG,
-        default_min_value=0,
-        default_max_value=100,
-        default_step=1,
     ).extend(
         {
+            cv.Optional(CONF_MAX_VALUE, default=100): cv.float_,
+            cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
+            cv.Optional(CONF_STEP, default=1): cv.float_,
             cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float_,
             cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
             cv.Optional(CONF_UNIT_OF_MEASUREMENT): cv.string_strict,
