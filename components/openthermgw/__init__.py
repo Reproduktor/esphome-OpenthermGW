@@ -102,7 +102,7 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
     )
 
 CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = cv.maybe_simple_value(
-    number.NUMBER_SCHEMA.extend(
+    number.number_schema().extend(
     {
         cv.GenerateID(): cv.declare_id(SimpleNumber),
         cv.Optional(
