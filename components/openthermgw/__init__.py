@@ -102,25 +102,24 @@ CONF_SCHEMA_ACME_OT_OVERRIDE_BINARY_SWITCH = cv.maybe_simple_value(
     )
 
 CONF_SCHEMA_ACME_OT_OVERRIDE_NUMBER = cv.maybe_simple_value(
-    number.number_schema().extend(
-    {
-        cv.GenerateID(): cv.declare_id(SimpleNumber),
-        cv.Optional(
-            CONF_ENTITY_CATEGORY, default=ENTITY_CATEGORY_CONFIG
-        ): cv.entity_category,
-        cv.Optional(CONF_MAX_VALUE, default=100): cv.float_,
-        cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
-        cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float_,
-        cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
-        cv.Optional(CONF_STEP, default=1): cv.float_,
-        cv.Optional(CONF_UNIT_OF_MEASUREMENT): cv.string_strict,
-        # cv.Optional(CONF_SET_ACTION): automation.validate_automation(
-        #     single=True
-        # ),
-    }
+    number.number_schema(
+        SimpleNumber,
+        entity_category=ENTITY_CATEGORY_CONFIG,
+        default_min_value=0,
+        default_max_value=100,
+        default_step=1,
+    ).extend(
+        {
+            cv.Optional(CONF_INITIAL_VALUE, default=0): cv.float_,
+            cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
+            cv.Optional(CONF_UNIT_OF_MEASUREMENT): cv.string_strict,
+        }
     ).extend(cv.COMPONENT_SCHEMA),
     key=CONF_NAME,
 )
+
+
+
 
 CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_SWITCH_LIST = "acme_opentherm_override_numeric_switches"
 CONF_SENSOR_ACME_OT_OVERRIDE_NUMERIC_VALUE = "acme_opentherm_override_numeric_value"
